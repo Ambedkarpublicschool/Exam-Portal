@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Mark Entry Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: white; color: black; }
+      table { border-collapse: collapse; width: 100%; font-size: 12px; }
+      th, td { border: 1px solid #000 !important; padding: 4px 6px !important; }
+      input { border: none !important; background: transparent !important; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-indigo-700 text-white p-4 shadow-md no-print sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+      <h1 class="text-xl font-bold flex items-center gap-2">
+        <i class="fa-solid fa-graduation-cap"></i> Exam Portal - Mark Entry
+      </h1>
+      
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <!-- Print Screen List Button -->
+        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow flex items-center gap-2">
+          <i class="fa-solid fa-print"></i> स्क्रीन लिस्ट प्रिंट करें
+        </button>
+        <!-- Print Result Button (Future Module Ready) -->
+        <button onclick="handlePrintResult()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow flex items-center gap-2">
+          <i class="fa-solid fa-file-lines"></i> प्रिंट रिजल्ट (<span id="selectedCount">0</span>)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filter Section -->
+  <div class="max-w-7xl mx-auto p-4 no-print">
+    <div class="bg-white rounded-lg shadow p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+      
+      <!-- Session Filter -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Session</label>
+        <select id="filterSession" onchange="applyFilters()" class="w-full border border-gray-300 rounded p-1.5 text-sm focus:ring focus:ring-indigo-200">
+          <option value="">लोड हो रहा है...</option>
+        </select>
+      </div>
+
+      <!-- Exam Name Filter -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Exam Name</label>
+        <select id="filterExam" onchange="onExamChange()" class="w-full border border-gray-300 rounded p-1.5 text-sm focus:ring focus:ring-indigo-200">
+          <option value="">परीक्षा चुनें</option>
+        </select>
+      </div>
+
+      <!-- Class Filter -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Class</label>
+        <select id="filterClass" onchange="applyFilters()" class="w-full border border-gray-300 rounded p-1.5 text-sm focus:ring focus:ring-indigo-200">
+          <option value="ALL">All Class</option>
+        </select>
+      </div>
+
+      <!-- Section Filter -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Section</label>
+        <select id="filterSection" onchange="applyFilters()" class="w-full border border-gray-300 rounded p-1.5 text-sm focus:ring focus:ring-indigo-200">
+          <option value="ALL">All Section</option>
+        </select>
+      </div>
+
+      <!-- Search Box -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Search Student</label>
+        <input type="text" id="filterSearch" oninput="applyFilters()" placeholder="नाम या ID से खोजें..." class="w-full border border-gray-300 rounded p-1.5 text-sm focus:ring focus:ring-indigo-200">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main Table Container -->
+  <main class="max-w-7xl mx-auto px-4 pb-12">
+    <!-- Status Indicator -->
+    <div id="loadingStatus" class="text-center py-8 font-medium text-indigo-600">
+      <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>डेटा लोड हो रहा है, कृपया प्रतीक्षा करें...
+    </div>
+
+    <div id="tableContainer" class="bg-white rounded-lg shadow overflow-x-auto hidden">
+      <table class="w-full text-left border-collapse text-xs sm:text-sm">
+        <thead class="bg-indigo-50 text-indigo-900 font-semibold border-b border-indigo-200 select-none">
+          <tr id="tableHeaderRow">
+            <!-- Headers dynamic -->
+          </tr>
+        </thead>
+        <tbody id="studentTableBody" class="divide-y divide-gray-200">
+          <!-- Rows dynamic -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    // Live Apps Script Web App URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzk8DGFenhOJinh2zhfTxBvuxCcWUg1rclsor2aPlspIURPmX1ivsWSHQmPeBDDL_TJLg/exec";
+
+    let state = {
+      sessions: [],
+      exams: [],
+      students: [],
+      savedMarks: {},
+      currentSubjects: [],
+      filteredStudents: [],
+      sortCol: null,
+      sortAsc: true
+    };
+
+    // Helper: Convert Google Drive Link to direct thumbnail
+    function formatDrivePhoto(url) {
+      if (!url) return 'https://via.placeholder.com/40?text=No+Img';
+      const match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w80`;
+      }
+      return url;
+    }
+
+    // Initialize & Fetch Data
+    async function init() {
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        
+        state.sessions = data.sessions || [];
+        state.exams = data.exams || [];
+        state.students = data.students || [];
+        
+        state.savedMarks = {};
+        (data.savedMarks || []).forEach(item => {
+          const key = `${item.session}_${item.studentId}_${item.examName}`;
+          state.savedMarks[key] = item.marks || {};
+        });
+
+        populateDropdowns();
+        document.getElementById('loadingStatus').classList.add('hidden');
+        document.getElementById('tableContainer').classList.remove('hidden');
+        onExamChange();
+      } catch (err) {
+        document.getElementById('loadingStatus').innerHTML = `<span class="text-red-500 font-bold">डेटा लोड करने में त्रुटि: ${err.message}</span>`;
+      }
+    }
+
+    function populateDropdowns() {
+      // 1. Sessions (default latest)
+      const sessionSelect = document.getElementById('filterSession');
+      sessionSelect.innerHTML = '';
+      state.sessions.forEach((s, idx) => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        if (idx === state.sessions.length - 1) opt.selected = true;
+        sessionSelect.appendChild(opt);
+      });
+
+      // 2. Exams
+      const examSelect = document.getElementById('filterExam');
+      examSelect.innerHTML = '';
+      state.exams.forEach((ex, idx) => {
+        const opt = document.createElement('option');
+        opt.value = ex.examName;
+        opt.textContent = ex.examName;
+        if (idx === 0) opt.selected = true;
+        examSelect.appendChild(opt);
+      });
+
+      // 3. Classes
+      const classes = Array.from(new Set(state.students.map(s => s.className).filter(Boolean)));
+      const classSelect = document.getElementById('filterClass');
+      classSelect.innerHTML = '<option value="ALL">All Class</option>';
+      classes.forEach(c => {
+        classSelect.innerHTML += `<option value="${c}">${c}</option>`;
+      });
+
+      // 4. Sections
+      const sections = Array.from(new Set(state.students.map(s => s.section).filter(Boolean)));
+      const secSelect = document.getElementById('filterSection');
+      secSelect.innerHTML = '<option value="ALL">All Section</option>';
+      sections.forEach(sec => {
+        secSelect.innerHTML += `<option value="${sec}">${sec}</option>`;
+      });
+    }
+
+    function onExamChange() {
+      const selectedExam = document.getElementById('filterExam').value;
+      const found = state.exams.find(e => e.examName === selectedExam);
+      state.currentSubjects = found ? found.subjects : [];
+      renderHeaders();
+      applyFilters();
+    }
+
+    function renderHeaders() {
+      const tr = document.getElementById('tableHeaderRow');
+      tr.innerHTML = `
+        <th class="p-2.5 text-center w-10">
+          <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this.checked)" class="cursor-pointer">
+        </th>
+        <th class="p-2.5 cursor-pointer" onclick="sortTable('sr')">SR <i class="fa-solid fa-sort text-xs"></i></th>
+        <th class="p-2.5 cursor-pointer" onclick="sortTable('studentId')">Student ID <i class="fa-solid fa-sort text-xs"></i></th>
+        <th class="p-2.5 text-center">Photo</th>
+        <th class="p-2.5 cursor-pointer" onclick="sortTable('studentName')">छात्र का नाम <i class="fa-solid fa-sort text-xs"></i></th>
+        <th class="p-2.5 cursor-pointer" onclick="sortTable('fatherName')">पिता का नाम <i class="fa-solid fa-sort text-xs"></i></th>
+        <th class="p-2.5 cursor-pointer" onclick="sortTable('className')">कक्षा <i class="fa-solid fa-sort text-xs"></i></th>
+        <th class="p-2.5 cursor-pointer" onclick="sortTable('section')">Sec <i class="fa-solid fa-sort text-xs"></i></th>
+      `;
+      
+      state.currentSubjects.forEach(sub => {
+        const th = document.createElement('th');
+        th.className = "p-2.5 text-center min-w-[80px]";
+        th.textContent = sub;
+        tr.appendChild(th);
+      });
+    }
+
+    function applyFilters() {
+      const session = document.getElementById('filterSession').value;
+      const cls = document.getElementById('filterClass').value;
+      const sec = document.getElementById('filterSection').value;
+      const q = document.getElementById('filterSearch').value.toLowerCase().trim();
+
+      state.filteredStudents = state.students.filter(s => {
+        const matchSession = !session || s.session === session;
+        const matchClass = cls === 'ALL' || s.className === cls;
+        const matchSec = sec === 'ALL' || s.section === sec;
+        const matchSearch = !q || s.studentName.toLowerCase().includes(q) || s.studentId.toLowerCase().includes(q);
+        return matchSession && matchClass && matchSec && matchSearch;
+      });
+
+      renderTableRows();
+    }
+
+    function renderTableRows() {
+      const tbody = document.getElementById('studentTableBody');
+      tbody.innerHTML = '';
+      
+      const currentSession = document.getElementById('filterSession').value;
+      const currentExam = document.getElementById('filterExam').value;
+
+      state.filteredStudents.forEach((stu, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-gray-50 transition border-b border-gray-100";
+        
+        const compositeKey = `${currentSession}_${stu.studentId}_${currentExam}`;
+        const studentSavedMarks = state.savedMarks[compositeKey] || {};
+
+        let rowHtml = `
+          <td class="p-2 text-center">
+            <input type="checkbox" class="student-check cursor-pointer" value="${stu.studentId}" onchange="updateSelectedCount()">
+          </td>
+          <td class="p-2 text-gray-500 font-medium">${idx + 1}</td>
+          <td class="p-2 font-mono font-medium">${stu.studentId}</td>
+          <td class="p-1.5 text-center">
+            <img src="${formatDrivePhoto(stu.photoLink)}" class="w-8 h-8 rounded-full object-cover mx-auto border" onerror="this.src='https://via.placeholder.com/32?text=NA'">
+          </td>
+          <td class="p-2 font-medium text-gray-900">${stu.studentName}</td>
+          <td class="p-2 text-gray-600">${stu.fatherName}</td>
+          <td class="p-2">${stu.className}</td>
+          <td class="p-2">${stu.section}</td>
+        `;
+
+        // Dynamic Subjects Input
+        state.currentSubjects.forEach(sub => {
+          const val = studentSavedMarks[sub] !== undefined ? studentSavedMarks[sub] : '';
+          rowHtml += `
+            <td class="p-1.5 text-center relative">
+              <input type="text" 
+                     data-session="${currentSession}" 
+                     data-id="${stu.studentId}" 
+                     data-exam="${currentExam}" 
+                     data-class="${stu.className}"
+                     data-sec="${stu.section}"
+                     data-sub="${sub}"
+                     value="${val}" 
+                     onblur="saveSingleMark(this)" 
+                     class="w-16 border border-gray-300 rounded text-center py-1 text-sm focus:bg-indigo-50 focus:border-indigo-500 outline-none">
+              <span class="status-indicator text-xs hidden absolute right-2 top-2.5"></span>
+            </td>
+          `;
+        });
+
+        tr.innerHTML = rowHtml;
+        tbody.appendChild(tr);
+      });
+
+      updateSelectedCount();
+    }
+
+    // Auto-Save Single Field Mark on Blur
+    async function saveSingleMark(input) {
+      const session = input.dataset.session;
+      const studentId = input.dataset.id;
+      const examName = input.dataset.exam;
+      const className = input.dataset.class;
+      const section = input.dataset.sec;
+      const subject = input.dataset.sub;
+      const value = input.value.trim();
+
+      const key = `${session}_${studentId}_${examName}`;
+      if (!state.savedMarks[key]) state.savedMarks[key] = {};
+      
+      if (state.savedMarks[key][subject] === value) return;
+
+      const indicator = input.parentElement.querySelector('.status-indicator');
+      if (indicator) {
+        indicator.className = "status-indicator text-xs absolute right-1 top-2.5 fa-solid fa-spinner fa-spin text-amber-500";
+      }
+
+      const payload = {
+        session: session,
+        studentId: studentId,
+        examName: examName,
+        className: className,
+        section: section,
+        marks: { [subject]: value }
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        state.savedMarks[key][subject] = value;
+        if (indicator) {
+          indicator.className = "status-indicator text-xs absolute right-1 top-2.5 fa-solid fa-check text-emerald-500";
+          setTimeout(() => indicator.className = "status-indicator hidden", 2000);
+        }
+      } catch (err) {
+        if (indicator) {
+          indicator.className = "status-indicator text-xs absolute right-1 top-2.5 fa-solid fa-triangle-exclamation text-red-500";
+        }
+      }
+    }
+
+    // Checkbox Management
+    function toggleSelectAll(isChecked) {
+      document.querySelectorAll('.student-check').forEach(cb => cb.checked = isChecked);
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      const count = document.querySelectorAll('.student-check:checked').length;
+      document.getElementById('selectedCount').textContent = count;
+    }
+
+    // Sorting Functionality
+    function sortTable(key) {
+      if (state.sortCol === key) {
+        state.sortAsc = !state.sortAsc;
+      } else {
+        state.sortCol = key;
+        state.sortAsc = true;
+      }
+
+      state.filteredStudents.sort((a, b) => {
+        let valA = a[key] || '';
+        let valB = b[key] || '';
+        return state.sortAsc ? valA.localeCompare(valB, 'hi') : valB.localeCompare(valA, 'hi');
+      });
+
+      renderTableRows();
+    }
+
+    // Future Result Printing Hook
+    function handlePrintResult() {
+      const selectedIds = Array.from(document.querySelectorAll('.student-check:checked')).map(cb => cb.value);
+      if (selectedIds.length === 0) {
+        alert('कृपया परिणाम (Result) प्रिंट करने के लिए कम से कम एक छात्र को चेकबॉक्स से चुनें!');
+        return;
+      }
+      alert(`चुने गए ${selectedIds.length} छात्रों के रिजल्ट प्रिंट करने की प्रोसेस भविष्य की फ़ाइल से जोड़ी जाएगी। ID: ${selectedIds.join(', ')}`);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
