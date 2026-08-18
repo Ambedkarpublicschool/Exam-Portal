@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>APS Exam Portal & Result Generator</title>
   
+  <!-- Google Fonts: Modak & Anton (Ultra Heavy Display Fonts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Modak&display=swap" rel="stylesheet">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -76,6 +81,16 @@
       flex-direction: column;
       justify-content: space-between;
       font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    .school-title-modak {
+      font-family: 'Modak', 'Anton', Impact, sans-serif !important;
+      font-size: 30px !important;
+      font-weight: 400 !important;
+      letter-spacing: 1.5px !important;
+      color: #1e1b4b !important;
+      line-height: 1.1 !important;
+      margin: 2px 0 0 0 !important;
     }
 
     .report-table-box {
@@ -498,10 +513,8 @@
         <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('className')">Class</th>
         <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('section')">Sec</th>
         
-        <!-- Mobile Student Details Header -->
         <th class="mobile-only p-1 text-left w-28 sm:w-36 cursor-pointer border-r border-indigo-200" onclick="sortTable('studentName')">छात्र विवरण</th>
 
-        <!-- Total Marks Column Placed Directly After Student Details -->
         <th class="p-1 sm:p-2 text-center cursor-pointer bg-indigo-200/80 hover:bg-indigo-300 transition text-indigo-950 font-extrabold border-r border-indigo-300" onclick="sortTable('calculatedTotal')">
           Total Marks <i class="fa-solid fa-sort ml-1 text-xs"></i>
         </th>
@@ -577,7 +590,6 @@
             </div>
           </td>
 
-          <!-- Total Marks Rendered Directly After Student Details -->
           <td class="p-1 sm:p-2 text-center font-extrabold text-indigo-900 bg-indigo-50/50 border-r border-gray-200 text-xs sm:text-sm">
             ${totalMarksDisplay}
           </td>
@@ -852,13 +864,13 @@
             </div>
 
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 8px 0;">
-              <img src="${LOGO_URL}" style="width: 68px; height: 68px; object-fit: contain;" alt="Logo">
+              <img src="${LOGO_URL}" style="width: 72px; height: 72px; object-fit: contain;" alt="Logo">
               <div style="text-align: center; flex: 1;">
                 <div style="font-size: 11px; font-weight: bold; color: #333;">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
-                <h1 style="font-size: 27px; font-weight: 900; color: #1e1b4b; margin: 2px 0 0 0; letter-spacing: 1px; line-height: 1.1;">AMBEDKAR PUBLIC SCHOOL</h1>
-                <p style="font-size: 12px; font-weight: 700; color: #475569; margin: 3px 0 0 0;">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
+                <h1 class="school-title-modak">AMBEDKAR PUBLIC SCHOOL</h1>
+                <p style="font-size: 12px; font-weight: 700; color: #475569; margin: 1px 0 0 0;">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
               </div>
-              <div style="width: 68px;"></div>
+              <div style="width: 72px;"></div>
             </div>
 
             <!-- Title Banner -->
