@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>APS Exam Portal & Result Generator</title>
   
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   
   <style>
@@ -29,7 +32,7 @@
       position: sticky;
       top: 0;
       z-index: 30;
-      background-color: #e0e7ff !important; /* Solid Indigo-100 */
+      background-color: #e0e7ff !important;
       box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.15);
       opacity: 1 !important;
     }
@@ -92,15 +95,19 @@
     }
 
     /* -------------------------------------------------------------
-       4. REPORT CARD & PRINT STYLING (A4 Full Page)
+       4. REPORT CARD & EXACT A4 PRINT STYLING
     ------------------------------------------------------------- */
+    @page {
+      size: A4 portrait;
+      margin: 6mm;
+    }
     .report-card {
       width: 194mm;
-      min-height: 278mm;
-      margin: 0 auto 10mm auto;
+      max-height: 275mm;
+      margin: 0 auto 8mm auto;
       background-color: #ffffff;
       border: 2px solid #1e293b;
-      padding: 6mm;
+      padding: 5mm 6mm;
       box-sizing: border-box;
       position: relative;
     }
@@ -112,6 +119,7 @@
       body {
         background-color: transparent !important;
         padding: 0 !important;
+        margin: 0 !important;
         color: #000000 !important;
       }
       .no-print {
@@ -143,14 +151,19 @@
 </head>
 <body class="bg-gray-100 min-h-screen text-gray-800">
 
+  <!-- ============================================================
+       SECTION 1: MARK ENTRY PORTAL (Main Dashboard)
+  ============================================================ -->
   <div id="portalSection">
     
+    <!-- Top Sticky Header -->
     <header class="bg-indigo-700 text-white px-3 py-2 shadow-md no-print sticky top-0 z-50">
       <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
         <h1 class="text-xs sm:text-base md:text-lg font-bold flex items-center gap-1.5">
           <i class="fa-solid fa-graduation-cap"></i> APS Exam Portal
         </h1>
         
+        <!-- Action Buttons -->
         <div class="flex items-center gap-2">
           <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-medium shadow flex items-center gap-1">
             <i class="fa-solid fa-print"></i> प्रिंट
@@ -162,9 +175,11 @@
       </div>
     </header>
 
+    <!-- Filter Bar -->
     <div class="max-w-7xl mx-auto px-2 py-2 no-print">
       <div class="bg-white rounded-lg shadow-sm p-2 grid grid-cols-5 gap-1.5 sm:gap-3 items-center">
         
+        <!-- Session Filter -->
         <div>
           <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Session</label>
           <select id="filterSession" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
@@ -172,6 +187,7 @@
           </select>
         </div>
 
+        <!-- Exam Name Filter -->
         <div>
           <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Exam</label>
           <select id="filterExam" onchange="onExamChange()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
@@ -179,6 +195,7 @@
           </select>
         </div>
 
+        <!-- Class Filter -->
         <div>
           <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Class</label>
           <select id="filterClass" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
@@ -186,6 +203,7 @@
           </select>
         </div>
 
+        <!-- Section Filter -->
         <div>
           <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Sec</label>
           <select id="filterSection" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
@@ -193,6 +211,7 @@
           </select>
         </div>
 
+        <!-- Search Box -->
         <div>
           <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Search</label>
           <input type="text" id="filterSearch" oninput="applyFilters()" placeholder="खोजें..." class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
@@ -201,6 +220,7 @@
       </div>
     </div>
 
+    <!-- Table Container with Solid Frozen Header Scroll -->
     <main class="max-w-7xl mx-auto px-1 sm:px-2 pb-6">
       <div id="loadingStatus" class="text-center py-8 font-medium text-indigo-600 text-xs sm:text-sm">
         <i class="fa-solid fa-spinner fa-spin text-xl mb-1.5"></i><br>लोड हो रहा है, प्रतीक्षा करें...
@@ -211,10 +231,12 @@
           <table class="border-collapse w-full">
             <thead class="text-indigo-950 font-bold border-b border-indigo-200 select-none">
               <tr id="tableHeaderRow">
-                </tr>
+                <!-- Dynamic Headers -->
+              </tr>
             </thead>
             <tbody id="studentTableBody" class="divide-y divide-gray-200 bg-white">
-              </tbody>
+              <!-- Dynamic Rows -->
+            </tbody>
           </table>
         </div>
       </div>
@@ -223,8 +245,12 @@
   </div>
 
 
+  <!-- ============================================================
+       SECTION 2: REPORT CARD PREVIEW & BULK PRINT MODAL
+  ============================================================ -->
   <div id="resultModalSection" class="hidden fixed inset-0 z-50 bg-gray-900/80 overflow-y-auto p-2 sm:p-4">
     
+    <!-- Top Action Bar (Inside Modal Preview) -->
     <div class="max-w-4xl mx-auto mb-4 bg-white p-3 rounded-lg shadow flex justify-between items-center no-print border border-gray-200">
       <div>
         <span class="font-bold text-sm text-indigo-950 flex items-center gap-1.5">
@@ -242,16 +268,19 @@
       </div>
     </div>
 
+    <!-- Cards Container where A4 Sheets are Generated -->
     <div id="cardsContainer"></div>
 
   </div>
 
 
+  <!-- ============================================================
+       SECTION 3: JAVASCRIPT LOGIC
+  ============================================================ -->
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzk8DGFenhOJinh2zhfTxBvuxCcWUg1rclsor2aPlspIURPmX1ivsWSHQmPeBDDL_TJLg/exec";
     const LOGO_URL = "https://i.postimg.cc/pLt1F2cD/logo-copy.png";
 
-    // Subject Full Name Mapping Dictionary
     const SUBJECT_MAP = {
       'H': 'HINDI',
       'E': 'ENGLISH',
@@ -291,7 +320,6 @@
       return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w200` : url;
     }
 
-    // CBSE Standard 8-Point Grading Scale
     function calculateGrade(percent) {
       if (percent >= 91) return 'A1';
       if (percent >= 81) return 'A2';
@@ -303,7 +331,6 @@
       return 'E';
     }
 
-    // Auto Next Class Promotion Helper
     function getPromotedClass(currentClass) {
       if (!currentClass) return 'Next Class';
       const cls = currentClass.toUpperCase().trim();
@@ -396,6 +423,7 @@
         </th>
         <th class="p-1 text-center w-6 sm:w-12 cursor-pointer border-r border-indigo-200" onclick="sortTable('sr')">#</th>
         
+        <!-- PC Headers -->
         <th class="pc-only p-2 cursor-pointer border-r border-indigo-200" onclick="sortTable('studentId')">ID</th>
         <th class="pc-only p-2 text-center border-r border-indigo-200">Photo</th>
         <th class="pc-only p-2 cursor-pointer border-r border-indigo-200" onclick="sortTable('studentName')">छात्र का नाम</th>
@@ -403,6 +431,7 @@
         <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('className')">Class</th>
         <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('section')">Sec</th>
 
+        <!-- Mobile Single Header -->
         <th class="mobile-only p-1 text-left w-28 sm:w-36 cursor-pointer border-r border-indigo-200" onclick="sortTable('studentName')">छात्र विवरण</th>
         <th class="mobile-only p-1 text-center w-10 cursor-pointer border-r border-indigo-200" onclick="sortTable('className')">कक्षा</th>
       `;
@@ -426,7 +455,6 @@
         const matchClass = cls === 'ALL' || s.className === cls;
         const matchSec = sec === 'ALL' || s.section === sec;
         
-        // Exact ID Match or Partial Name / Father Name Match
         const isExactId = s.studentId.toLowerCase() === q;
         const isNameMatch = s.studentName.toLowerCase().includes(q) || (s.fatherName && s.fatherName.toLowerCase().includes(q));
         const matchSearch = !q || isExactId || isNameMatch;
@@ -452,11 +480,13 @@
         const studentSavedMarks = state.savedMarks[compositeKey] || {};
 
         let rowHtml = `
+          <!-- Checkbox & SR -->
           <td class="p-1 text-center border-r border-gray-200">
             <input type="checkbox" class="student-check cursor-pointer scale-90 sm:scale-100" value="${stu.studentId}" onchange="updateSelectedCount()">
           </td>
           <td class="p-1 text-center text-gray-500 font-mono text-[10px] sm:text-xs border-r border-gray-200">${idx + 1}</td>
           
+          <!-- PC Specific Columns -->
           <td class="pc-only p-2 font-mono font-medium border-r border-gray-200">${stu.studentId}</td>
           <td class="pc-only p-1.5 text-center border-r border-gray-200">
             <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full object-cover mx-auto border" onerror="this.onerror=null;this.src='https://placehold.co/60x60?text=NA';">
@@ -466,6 +496,7 @@
           <td class="pc-only p-2 text-center border-r border-gray-200">${stu.className}</td>
           <td class="pc-only p-2 text-center border-r border-gray-200">${stu.section}</td>
 
+          <!-- Mobile Specific Columns -->
           <td class="mobile-only p-1 border-r border-gray-200 overflow-hidden">
             <div class="flex items-center gap-1">
               <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-6 h-6 rounded-full object-cover shrink-0 border" onerror="this.onerror=null;this.src='https://placehold.co/60x60?text=NA';">
@@ -581,7 +612,7 @@
     }
 
     // ============================================================
-    // REPORT CARD BUILDER & RENDERER (A4 Consolidated View)
+    // REPORT CARD BUILDER & RENDERER (Clean A4 Fit & Proportional Attendance)
     // ============================================================
     function handlePrintResult() {
       const selectedIds = Array.from(document.querySelectorAll('.student-check:checked')).map(cb => cb.value);
@@ -599,18 +630,29 @@
 
       const currentExamObj = state.exams.find(e => e.examName === targetExam) || { maxMarkPerSubject: 100, subjects: [] };
 
+      // 1. Determine Working Days based on Exam Type (210/3=70 for Q, 210/2=105 for HY, 210 for Annual)
+      let workingDays = 210;
+      const isAnnual = targetExam.toLowerCase().includes("annual");
+      const isHalfYearly = targetExam.toLowerCase().includes("half");
+
+      if (targetExam.toLowerCase().includes("quarterly")) {
+        workingDays = Math.round(210 / 3); // 70 Days
+      } else if (isHalfYearly) {
+        workingDays = Math.round(210 / 2); // 105 Days
+      } else {
+        workingDays = 210; // 210 Days
+      }
+
       selectedIds.forEach((studentId) => {
-        // Exact match with Session & Student ID
         const stu = state.students.find(s => s.session === targetSession && s.studentId === studentId);
         if (!stu) return;
 
-        // Helper to fetch marks of any exam for this specific student
         const getMarksForExam = (examName) => {
           const entry = state.rawMarksList.find(m => m.session === targetSession && m.studentId === studentId && m.examName === examName);
           return entry ? entry.marks : {};
         };
 
-        // 1. Current Exam Marks Calculation
+        // 2. Current Exam Marks Calculation
         const curMarksObj = getMarksForExam(targetExam);
         let activeSubjectRows = '';
         let curObtainedSum = 0;
@@ -629,16 +671,16 @@
 
             activeSubjectRows += `
               <tr class="border-b border-gray-300 text-center">
-                <td class="p-1 text-left font-semibold pl-2">${getSubjectFullName(subCode)}</td>
-                <td class="p-1">100</td>
-                <td class="p-1 font-bold">${scaledMark}</td>
-                <td class="p-1 font-semibold text-gray-700">${subGrade}</td>
+                <td class="py-0.5 text-left font-semibold pl-2">${getSubjectFullName(subCode)}</td>
+                <td class="py-0.5">100</td>
+                <td class="py-0.5 font-bold">${scaledMark}</td>
+                <td class="py-0.5 font-semibold text-gray-700">${subGrade}</td>
               </tr>
             `;
           }
         });
 
-        // 2. Previous Terms Consolidated Calculation
+        // 3. Consolidated Previous Terms Calculation
         const calcTermSummary = (examName) => {
           const examInfo = state.exams.find(e => e.examName === examName);
           const mObj = getMarksForExam(examName);
@@ -670,7 +712,7 @@
               <span class="font-bold">${curObtainedSum} / ${curMaxSum}</span>
             </div>
           `;
-        } else if (targetExam.toLowerCase().includes("half")) {
+        } else if (isHalfYearly) {
           grandObtained = qSummary.obt + curObtainedSum;
           grandMax = qSummary.max + curMaxSum;
           summaryBreakdownHtml = `
@@ -705,37 +747,45 @@
         const finalPercentage = grandMax > 0 ? ((grandObtained / grandMax) * 100).toFixed(2) : "0.00";
         const overallGrade = calculateGrade(parseFloat(finalPercentage));
 
-        const workingDays = 210;
+        // Present days calculated on current working days
         const presentDays = Math.round(workingDays * (0.75 + (parseFloat(finalPercentage) / 100) * 0.20));
         const attendancePercent = ((presentDays / workingDays) * 100).toFixed(2);
+
+        // 4. Promotion Status only on Annual Exam
+        const promotionHtml = isAnnual
+          ? `<div><span class="font-semibold text-gray-600">Promotion Status:</span> <span class="font-bold text-indigo-950">Promoted to ${getPromotedClass(stu.className)}</span></div>`
+          : `<div><span class="font-semibold text-gray-600">Status:</span> <span class="font-bold text-emerald-800">Progressing Satisfactorily</span></div>`;
 
         // Report Card Outer Element
         const card = document.createElement('div');
         card.className = 'report-card flex flex-col justify-between';
         
         card.innerHTML = `
+          <!-- Header Area -->
           <div>
-            <div class="flex justify-between text-[9px] font-semibold text-gray-700 border-b border-gray-400 pb-1 mb-1">
+            <div class="flex justify-between text-[9px] font-semibold text-gray-700 border-b border-gray-400 pb-0.5 mb-1">
               <span>Recognition Number: GOP0958326469</span>
               <span>U-DISE Code: 09584109512</span>
             </div>
 
             <div class="flex items-center justify-between gap-2 my-1">
-              <img src="${LOGO_URL}" class="w-16 h-16 object-contain" alt="Logo">
+              <img src="${LOGO_URL}" class="w-14 h-14 object-contain" alt="Logo">
               <div class="text-center flex-1">
-                <div class="text-[10px] font-bold text-gray-700 leading-none">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
-                <h1 class="text-xl font-extrabold tracking-wide text-indigo-950 mt-0.5">AMBEDKAR PUBLIC SCHOOL</h1>
-                <p class="text-[10px] font-medium text-gray-600">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
+                <div class="text-[9px] font-bold text-gray-700 leading-none">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
+                <h1 class="text-lg font-extrabold tracking-wide text-indigo-950 mt-0.5">AMBEDKAR PUBLIC SCHOOL</h1>
+                <p class="text-[9px] font-medium text-gray-600">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
               </div>
-              <div class="w-16"></div>
+              <div class="w-14"></div>
             </div>
 
-            <div class="card-banner text-white text-center py-1 font-bold text-sm tracking-wider uppercase rounded shadow-sm my-2">
+            <!-- Title Banner -->
+            <div class="card-banner text-white text-center py-0.5 font-bold text-xs tracking-wider uppercase rounded shadow-sm my-1">
               Result of ${targetExam} (${targetSession})
             </div>
 
-            <div class="border border-gray-400 p-2 rounded flex justify-between items-center my-2 text-[11px] bg-slate-50/50">
-              <div class="grid grid-cols-2 gap-x-4 gap-y-1 flex-1">
+            <!-- Student Profile -->
+            <div class="border border-gray-400 p-1.5 rounded flex justify-between items-center my-1.5 text-[10px] bg-slate-50/50">
+              <div class="grid grid-cols-2 gap-x-3 gap-y-0.5 flex-1">
                 <div><span class="text-gray-500 font-medium">Student's Name:</span> <span class="font-bold text-gray-900 uppercase">${stu.studentName}</span></div>
                 <div><span class="text-gray-500 font-medium">Class & Sec:</span> <span class="font-bold text-gray-900">${stu.className} - ${stu.section}</span></div>
                 <div><span class="text-gray-500 font-medium">Student ID:</span> <span class="font-bold font-mono text-gray-900">${stu.studentId}</span></div>
@@ -743,68 +793,71 @@
                 <div><span class="text-gray-500 font-medium">Mother's Name:</span> <span class="font-semibold text-gray-900">${stu.motherName || '—'}</span></div>
                 <div><span class="text-gray-500 font-medium">Father's Name:</span> <span class="font-semibold text-gray-900">${stu.fatherName}</span></div>
               </div>
-              <div class="w-20 h-24 border border-gray-400 bg-white p-0.5 rounded shrink-0 ml-2 shadow-sm">
+              <div class="w-16 h-20 border border-gray-400 bg-white p-0.5 rounded shrink-0 ml-2 shadow-sm">
                 <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded" alt="Student Photo">
               </div>
             </div>
 
-            <div class="grid grid-cols-12 gap-2 my-2 items-start">
+            <!-- Performance Grids -->
+            <div class="grid grid-cols-12 gap-2 my-1 items-start">
               
+              <!-- Scholastic Marks -->
               <div class="col-span-7 border border-gray-400 rounded overflow-hidden">
-                <div class="bg-indigo-900 text-white font-bold text-center py-0.5 text-[10px] tracking-wider uppercase">
+                <div class="bg-indigo-900 text-white font-bold text-center py-0.5 text-[9px] tracking-wider uppercase">
                   Scholastic Performance (${targetExam})
                 </div>
-                <table class="w-full text-[10px]">
+                <table class="w-full text-[9px]">
                   <thead class="bg-indigo-50 font-bold border-b border-gray-400">
                     <tr class="text-center">
-                      <th class="p-1 text-left pl-2">Subject</th>
-                      <th class="p-1">Max</th>
-                      <th class="p-1">Gained</th>
-                      <th class="p-1">Grade</th>
+                      <th class="py-0.5 text-left pl-2">Subject</th>
+                      <th class="py-0.5">Max</th>
+                      <th class="py-0.5">Gained</th>
+                      <th class="py-0.5">Grade</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${activeSubjectRows || '<tr><td colspan="4" class="text-center py-4 text-gray-400">कोई अंक उपलब्ध नहीं</td></tr>'}
+                    ${activeSubjectRows || '<tr><td colspan="4" class="text-center py-2 text-gray-400">कोई अंक उपलब्ध नहीं</td></tr>'}
                   </tbody>
                   <tfoot class="bg-indigo-50 font-bold border-t border-gray-400 text-center">
                     <tr>
-                      <td class="p-1 text-left pl-2">Total (${targetExam})</td>
-                      <td class="p-1">${curMaxSum}</td>
-                      <td class="p-1 text-indigo-900">${curObtainedSum}</td>
-                      <td class="p-1">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
+                      <td class="py-0.5 text-left pl-2">Total (${targetExam})</td>
+                      <td class="py-0.5">${curMaxSum}</td>
+                      <td class="py-0.5 text-indigo-900">${curObtainedSum}</td>
+                      <td class="py-0.5">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
 
-              <div class="col-span-5 flex flex-col gap-2">
+              <!-- Co-Scholastic & Attendance -->
+              <div class="col-span-5 flex flex-col gap-1.5">
                 
                 <div class="border border-gray-400 rounded overflow-hidden">
-                  <div class="bg-indigo-900 text-white font-bold text-center py-0.5 text-[10px] tracking-wider uppercase">
+                  <div class="bg-indigo-900 text-white font-bold text-center py-0.5 text-[9px] tracking-wider uppercase">
                     Co-Scholastic Areas
                   </div>
-                  <table class="w-full text-[10px]">
+                  <table class="w-full text-[9px]">
                     <thead class="bg-indigo-50 font-bold border-b border-gray-400">
                       <tr class="text-center">
-                        <th class="p-1 text-left pl-2">Areas</th>
-                        <th class="p-1 text-right pr-2">Grade/Status</th>
+                        <th class="py-0.5 text-left pl-2">Areas</th>
+                        <th class="py-0.5 text-right pr-2">Grade</th>
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                      <tr><td class="p-1 pl-2">Discipline</td><td class="p-1 text-right pr-2 font-medium">Well-Behaved</td></tr>
-                      <tr><td class="p-1 pl-2">Cleanliness</td><td class="p-1 text-right pr-2 font-medium">Maintained</td></tr>
-                      <tr><td class="p-1 pl-2">Speaking Skill</td><td class="p-1 text-right pr-2 font-medium">Articulate</td></tr>
-                      <tr><td class="p-1 pl-2">Activity Participation</td><td class="p-1 text-right pr-2 font-medium">Enthusiastic</td></tr>
-                      <tr><td class="p-1 pl-2">Homework Regularity</td><td class="p-1 text-right pr-2 font-medium">Consistent</td></tr>
+                      <tr><td class="py-0.5 pl-2">Discipline</td><td class="py-0.5 text-right pr-2 font-medium">Well-Behaved</td></tr>
+                      <tr><td class="py-0.5 pl-2">Cleanliness</td><td class="py-0.5 text-right pr-2 font-medium">Maintained</td></tr>
+                      <tr><td class="py-0.5 pl-2">Speaking Skill</td><td class="py-0.5 text-right pr-2 font-medium">Articulate</td></tr>
+                      <tr><td class="py-0.5 pl-2">Activity Participation</td><td class="py-0.5 text-right pr-2 font-medium">Enthusiastic</td></tr>
+                      <tr><td class="py-0.5 pl-2">Homework Regularity</td><td class="py-0.5 text-right pr-2 font-medium">Consistent</td></tr>
                     </tbody>
                   </table>
                 </div>
 
                 <div class="border border-gray-400 rounded overflow-hidden">
-                  <div class="bg-indigo-900 text-white font-bold text-center py-0.5 text-[10px] tracking-wider uppercase">
+                  <div class="bg-indigo-900 text-white font-bold text-center py-0.5 text-[9px] tracking-wider uppercase">
                     Attendance Record
                   </div>
-                  <div class="p-1.5 text-[10px] space-y-0.5 bg-white">
+                  <div class="p-1 text-[9px] space-y-0.5 bg-white">
                     <div class="flex justify-between"><span>Working Days:</span><span class="font-bold">${workingDays}</span></div>
                     <div class="flex justify-between"><span>Present Days:</span><span class="font-bold">${presentDays}</span></div>
                     <div class="flex justify-between border-t border-gray-200 pt-0.5"><span>Attendance:</span><span class="font-bold text-indigo-900">${attendancePercent}%</span></div>
@@ -815,40 +868,42 @@
 
             </div>
 
-            <div class="border border-indigo-900 rounded my-2 bg-indigo-50/40 p-2 text-[11px]">
-              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-1 mb-1">CONSOLIDATED PROGRESS SUMMARY</div>
-              <div class="grid grid-cols-2 gap-x-4">
+            <!-- Consolidated Summary Box -->
+            <div class="border border-indigo-900 rounded my-1.5 bg-indigo-50/40 p-1.5 text-[10px]">
+              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-0.5 mb-0.5 text-[9px]">CONSOLIDATED PROGRESS SUMMARY</div>
+              <div class="grid grid-cols-2 gap-x-3">
                 <div class="space-y-0.5">${summaryBreakdownHtml}</div>
-                <div class="border-l border-indigo-200 pl-3 flex flex-col justify-center space-y-1">
-                  <div class="flex justify-between"><span>Grand Total:</span><span class="font-bold text-sm text-indigo-950">${grandObtained} / ${grandMax}</span></div>
-                  <div class="flex justify-between"><span>Percentage:</span><span class="font-bold text-sm text-indigo-950">${finalPercentage}%</span></div>
-                  <div class="flex justify-between"><span>Overall Grade:</span><span class="font-bold text-sm text-indigo-950">${overallGrade}</span></div>
+                <div class="border-l border-indigo-200 pl-2 flex flex-col justify-center space-y-0.5">
+                  <div class="flex justify-between"><span>Grand Total:</span><span class="font-bold text-xs text-indigo-950">${grandObtained} / ${grandMax}</span></div>
+                  <div class="flex justify-between"><span>Percentage:</span><span class="font-bold text-xs text-indigo-950">${finalPercentage}%</span></div>
+                  <div class="flex justify-between"><span>Overall Grade:</span><span class="font-bold text-xs text-indigo-950">${overallGrade}</span></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="border-t border-gray-400 pt-2 mt-auto">
-            <div class="flex justify-between items-center text-[10px] mb-2">
+          <!-- Bottom Remarks, QR Code & Signatures (Zero Extra Gap) -->
+          <div class="border-t border-gray-400 pt-1.5 mt-1">
+            <div class="flex justify-between items-center text-[9px] mb-1">
               <div><span class="font-semibold text-gray-600">Teacher's Remark:</span> <span class="font-medium italic">Shows consistent progress, good conduct and focus.</span></div>
-              <div><span class="font-semibold text-gray-600">Promotion Status:</span> <span class="font-bold text-indigo-950">Promoted to ${getPromotedClass(stu.className)}</span></div>
+              ${promotionHtml}
             </div>
 
-            <div class="flex justify-between items-end pt-4 pb-1 text-center text-[10px] font-bold text-gray-800">
+            <div class="flex justify-between items-end pt-2 pb-0.5 text-center text-[9px] font-bold text-gray-800">
               <div class="flex flex-col items-center">
-                <div id="qr_${studentId}" class="mb-1 p-0.5 border border-gray-300 rounded bg-white"></div>
+                <div id="qr_${studentId}" class="mb-0.5 p-0.5 border border-gray-300 rounded bg-white"></div>
                 <span class="text-[8px] text-gray-500 font-normal">Scan to Verify</span>
-                <span class="text-[8px] text-gray-500 font-normal mt-0.5">Date: ${new Date().toLocaleDateString('en-GB')}</span>
+                <span class="text-[8px] text-gray-500 font-normal">Date: ${new Date().toLocaleDateString('en-GB')}</span>
               </div>
 
               <div class="flex flex-col items-center">
-                <div class="h-10"></div>
-                <div class="border-t border-gray-800 w-32 pt-0.5">Class Teacher</div>
+                <div class="h-6"></div>
+                <div class="border-t border-gray-800 w-28 pt-0.5">Class Teacher</div>
               </div>
 
               <div class="flex flex-col items-center">
-                <div class="h-10"></div>
-                <div class="border-t border-gray-800 w-40 pt-0.5">
+                <div class="h-6"></div>
+                <div class="border-t border-gray-800 w-36 pt-0.5">
                   <div>Principal's Stamp & Signature</div>
                   <div class="text-[8px] text-gray-500 font-normal">Ambedkar Public School</div>
                 </div>
@@ -861,9 +916,9 @@
 
         // QR Code Generator
         new QRCode(document.getElementById(`qr_${studentId}`), {
-          text: `APS MADHOPUR | Student: ${stu.studentName} | ID: ${stu.studentId} | Class: ${stu.className} | Session: ${targetSession} | Status: PASSED`,
-          width: 44,
-          height: 44,
+          text: `APS MADHOPUR | Student: ${stu.studentName} | ID: ${stu.studentId} | Class: ${stu.className} | Session: ${targetSession} | Status: ${isAnnual ? 'PROMOTED' : 'PASS'}`,
+          width: 40,
+          height: 40,
           colorDark: "#1e1b4b",
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.M
