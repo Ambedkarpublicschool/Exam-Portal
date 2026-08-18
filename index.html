@@ -152,7 +152,7 @@
             <i class="fa-solid fa-print"></i> प्रिंट
           </button>
           <button onclick="handlePrintResult()" class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded text-xs font-medium shadow flex items-center gap-1">
-            <i class="fa-solid fa-file-lines"></i> रिजल्ट (<span id="selectedCount">0</span>)[span_0](start_span)[span_0](end_span)
+            <i class="fa-solid fa-file-lines"></i> रिजल्ट (<span id="selectedCount">0</span>)
           </button>
         </div>
       </div>
@@ -700,7 +700,7 @@
     }
 
     // ============================================================
-    // REPORT CARD BUILDER (Prominent Header & Complete Flow)
+    // REPORT CARD BUILDER
     // ============================================================
     function handlePrintResult() {
       const selectedIds = Array.from(document.querySelectorAll('.student-check:checked')).map(cb => cb.value);
@@ -866,29 +866,25 @@
               Result of ${targetExam} (${targetSession})
             </div>
 
-            <!-- Student Profile Box (Complete 4-Row Flow with DOB in Words) -->
+            <!-- Student Profile Box -->
             <div style="border: 1.5px solid #0f172a; padding: 10px 14px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background-color: #f8fafc;">
               <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 11.5px;">
                 
-                <!-- 1. Student Name (Full Width) -->
                 <div>
                   <span style="color: #475569; font-weight: 600;">Student's Name:</span> 
                   <b style="font-size: 13.5px; color: #0f172a; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 4px;">${stu.studentName}</b>
                 </div>
 
-                <!-- 2. Father's Name (Full Width) -->
                 <div>
                   <span style="color: #475569; font-weight: 600;">Father's Name:</span> 
                   <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.fatherName}</b>
                 </div>
 
-                <!-- 3. Mother's Name (Full Width) -->
                 <div>
                   <span style="color: #475569; font-weight: 600;">Mother's Name:</span> 
                   <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.motherName || '—'}</b>
                 </div>
 
-                <!-- 4. Student ID, Class & Sec, and DOB with Words -->
                 <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 1px;">
                   <div>
                     <span style="color: #475569; font-weight: 600;">Student ID:</span> 
@@ -906,7 +902,6 @@
 
               </div>
 
-              <!-- 35mm x 40mm Large Photo -->
               <div style="width: 35mm; height: 40mm; border: 1.5px solid #0f172a; background: #fff; padding: 1px; border-radius: 3px; flex-shrink: 0; margin-left: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; border-radius: 2px;" alt="Photo">
               </div>
@@ -915,7 +910,6 @@
             <!-- Performance Grids Area -->
             <div style="display: grid; grid-template-columns: 58fr 42fr; gap: 12px; margin-bottom: 12px; align-items: start;">
               
-              <!-- Scholastic Performance Table (Left) -->
               <div style="border: 1.5px solid #0f172a; border-radius: 3px; overflow: hidden;">
                 <div style="background-color: #1e1b4b; color: #ffffff; font-weight: bold; text-align: center; padding: 5px 0; font-size: 11px; text-transform: uppercase;">
                   Scholastic Performance (${targetExam})
@@ -943,10 +937,7 @@
                 </table>
               </div>
 
-              <!-- Co-Scholastic & Attendance Area (Right) -->
               <div style="display: flex; flex-direction: column; gap: 10px;">
-                
-                <!-- Co-Scholastic Table -->
                 <div style="border: 1.5px solid #0f172a; border-radius: 3px; overflow: hidden;">
                   <div style="background-color: #1e1b4b; color: #ffffff; font-weight: bold; text-align: center; padding: 5px 0; font-size: 11px; text-transform: uppercase;">
                     Co-Scholastic Areas
@@ -968,7 +959,6 @@
                   </table>
                 </div>
 
-                <!-- Attendance Box -->
                 <div style="border: 1.5px solid #0f172a; border-radius: 3px; overflow: hidden;">
                   <div style="background-color: #1e1b4b; color: #ffffff; font-weight: bold; text-align: center; padding: 5px 0; font-size: 11px; text-transform: uppercase;">
                     Attendance Record
@@ -979,7 +969,6 @@
                     <div style="display: flex; justify-content: space-between; border-top: 1px solid #cbd5e1; padding-top: 4px;"><span>Attendance:</span><span style="font-weight: bold; color: #1e1b4b;">${attendancePercent}%</span></div>
                   </div>
                 </div>
-
               </div>
 
             </div>
