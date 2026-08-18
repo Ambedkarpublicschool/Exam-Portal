@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>APS Exam Portal & Result Generator</title>
   
-  <!-- Google Fonts: Modak & Anton (Ultra Heavy Display Fonts) -->
+  <!-- Google Fonts: Modak & Anton -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Modak&display=swap" rel="stylesheet">
@@ -61,11 +61,11 @@
     }
 
     /* -------------------------------------------------------------
-       2. EXACT A4 FULL-PAGE BALANCED PRINT STYLING
+       2. EXACT A4 FULL-PAGE BALANCED REPORT CARD STYLING
     ------------------------------------------------------------- */
     @page {
-      size: A4 portrait;
-      margin: 0;
+      size: auto;
+      margin: 5mm;
     }
     
     .report-card-container {
@@ -102,26 +102,55 @@
       box-sizing: border-box;
     }
 
+    /* -------------------------------------------------------------
+       3. DUAL-PRINT CSS (PORTAL TABLE UI PRINT + RESULT CARD PRINT)
+    ------------------------------------------------------------- */
     @media print {
-      html, body {
-        width: 210mm !important;
-        height: 297mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
+      body {
         background: #ffffff !important;
         color: #000000 !important;
       }
       .no-print {
         display: none !important;
       }
-      #portalSection {
-        display: none !important;
+
+      /* When Portal Dashboard Table is being printed */
+      #portalSection:not(.hidden) {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
-      #resultModalSection {
+      #portalSection:not(.hidden) .table-scroll-container {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      #portalSection:not(.hidden) table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+      #portalSection:not(.hidden) th, 
+      #portalSection:not(.hidden) td {
+        border: 1px solid #000000 !important;
+        font-size: 11px !important;
+        padding: 4px !important;
+        color: #000000 !important;
+      }
+      #portalSection:not(.hidden) .subject-input {
+        border: none !important;
+        background: transparent !important;
+        font-weight: bold !important;
+        font-size: 11px !important;
+        width: 100% !important;
+        text-align: center !important;
+      }
+
+      /* When Result Modal Preview is being printed */
+      #resultModalSection:not(.hidden) {
         display: block !important;
         position: static !important;
         background: transparent !important;
-        padding: 8mm 0 0 0 !important;
+        padding: 0 !important;
         margin: 0 !important;
       }
       .report-card-container {
@@ -513,8 +542,10 @@
         <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('className')">Class</th>
         <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('section')">Sec</th>
         
+        <!-- Mobile Student Details Header -->
         <th class="mobile-only p-1 text-left w-28 sm:w-36 cursor-pointer border-r border-indigo-200" onclick="sortTable('studentName')">छात्र विवरण</th>
 
+        <!-- Total Marks Column Placed Directly After Student Details -->
         <th class="p-1 sm:p-2 text-center cursor-pointer bg-indigo-200/80 hover:bg-indigo-300 transition text-indigo-950 font-extrabold border-r border-indigo-300" onclick="sortTable('calculatedTotal')">
           Total Marks <i class="fa-solid fa-sort ml-1 text-xs"></i>
         </th>
@@ -590,6 +621,7 @@
             </div>
           </td>
 
+          <!-- Total Marks Rendered Directly After Student Details -->
           <td class="p-1 sm:p-2 text-center font-extrabold text-indigo-900 bg-indigo-50/50 border-r border-gray-200 text-xs sm:text-sm">
             ${totalMarksDisplay}
           </td>
