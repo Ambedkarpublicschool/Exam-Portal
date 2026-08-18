@@ -95,43 +95,51 @@
     }
 
     /* -------------------------------------------------------------
-       4. REPORT CARD EXACT A4 FULL-PAGE EXPANDED PRINT STYLING
+       4. PURE STANDALONE A4 REPORT CARD STYLING (ZERO TAILWIND DEPENDENCY FOR PRINT)
     ------------------------------------------------------------- */
     @page {
       size: A4 portrait;
-      margin: 6mm;
+      margin: 6mm 8mm;
     }
     
-    .report-card {
-      width: 198mm;
-      min-height: 284mm;
-      margin: 0 auto 10mm auto;
+    .report-card-container {
+      width: 194mm;
+      height: 282mm;
+      max-height: 282mm;
+      margin: 0 auto 12mm auto;
       background-color: #ffffff;
-      border: 2px solid #1e293b;
+      border: 2.5px solid #0f172a;
       padding: 6mm 8mm;
       box-sizing: border-box;
-      position: relative;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-    }
-    
-    .card-banner {
-      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      font-family: 'Segoe UI', Arial, sans-serif;
     }
 
-    /* Fixed Spacious Row Heights for Crisp Alignment */
-    .sch-row {
-      height: 30px !important;
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
     }
-    .co-row {
-      height: 27px !important;
+    
+    .report-table th, .report-table td {
+      border: 1px solid #94a3b8;
+      box-sizing: border-box;
+    }
+
+    /* High-Spacious Row Heights */
+    .sch-tr {
+      height: 32px !important;
+    }
+    .co-tr {
+      height: 30px !important;
     }
 
     @media print {
       html, body {
-        width: 100% !important;
-        height: 100% !important;
+        width: 210mm !important;
+        height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -150,16 +158,14 @@
         padding: 0 !important;
         margin: 0 !important;
       }
-      .report-card {
-        width: 100% !important;
-        max-width: 198mm !important;
-        height: 284mm !important;
-        min-height: 284mm !important;
-        max-height: 284mm !important;
+      .report-card-container {
+        width: 194mm !important;
+        height: 282mm !important;
+        max-height: 282mm !important;
         margin: 0 auto !important;
         padding: 6mm 8mm !important;
         box-sizing: border-box !important;
-        border: 2px solid #000000 !important;
+        border: 2.5px solid #000000 !important;
         page-break-after: always !important;
         break-after: page !important;
       }
@@ -277,7 +283,7 @@
   ============================================================ -->
   <div id="resultModalSection" class="hidden fixed inset-0 z-50 bg-gray-900/80 overflow-y-auto p-2 sm:p-4">
     
-    <!-- Top Action Bar (Inside Modal Preview) -->
+    <!-- Top Action Bar -->
     <div class="max-w-4xl mx-auto mb-4 bg-white p-3 rounded-lg shadow flex justify-between items-center no-print border border-gray-200">
       <div>
         <span class="font-bold text-sm text-indigo-950 flex items-center gap-1.5">
@@ -295,7 +301,7 @@
       </div>
     </div>
 
-    <!-- Cards Container where A4 Sheets are Generated -->
+    <!-- Cards Container -->
     <div id="cardsContainer"></div>
 
   </div>
@@ -635,7 +641,7 @@
     }
 
     // ============================================================
-    // REPORT CARD BUILDER (1:1 Exact Full-Page A4 Layout)
+    // REPORT CARD BUILDER (Pure CSS Solid Full-Page A4)
     // ============================================================
     function handlePrintResult() {
       const selectedIds = Array.from(document.querySelectorAll('.student-check:checked')).map(cb => cb.value);
@@ -693,11 +699,11 @@
             curMaxSum += 100;
 
             activeSubjectRows += `
-              <tr class="sch-row border-b border-gray-300 text-center text-xs">
-                <td class="px-4 text-left font-semibold w-[46%] leading-relaxed">${getSubjectFullName(subCode)}</td>
-                <td class="px-2 w-[18%]">100</td>
-                <td class="px-2 w-[18%] font-bold text-gray-900">${scaledMark}</td>
-                <td class="px-2 w-[18%] font-semibold text-gray-700">${subGrade}</td>
+              <tr class="sch-tr" style="border-bottom: 1px solid #cbd5e1; height: 32px;">
+                <td style="padding: 4px 12px; text-align: left; font-weight: 600; width: 46%; font-size: 11.5px;">${getSubjectFullName(subCode)}</td>
+                <td style="padding: 4px; text-align: center; width: 18%; font-size: 11.5px;">100</td>
+                <td style="padding: 4px; text-align: center; width: 18%; font-weight: bold; font-size: 12px;">${scaledMark}</td>
+                <td style="padding: 4px; text-align: center; width: 18%; font-weight: 600; color: #334155; font-size: 11.5px;">${subGrade}</td>
               </tr>
             `;
           }
@@ -736,39 +742,39 @@
           grandObtained = curObtainedSum;
           grandMax = curMaxSum;
           progressRowsHtml = `
-            <div class="flex justify-between items-center py-2 text-xs">
-              <span class="font-medium">1. Quarterly Examination :</span>
-              <span class="font-bold text-gray-900">${curObtainedSum} / ${curMaxSum}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 12px;">
+              <span style="font-weight: 600; color: #334155;">1. Quarterly Examination :</span>
+              <span style="font-weight: bold; color: #0f172a;">${curObtainedSum} / ${curMaxSum}</span>
             </div>
           `;
         } else if (isHalfYearly) {
           grandObtained = qSummary.obt + curObtainedSum;
           grandMax = qSummary.max + curMaxSum;
           progressRowsHtml = `
-            <div class="flex justify-between items-center border-b border-gray-200 py-1.5 text-xs">
-              <span class="font-medium">1. Quarterly Examination :</span>
-              <span class="font-bold text-gray-900">${qSummary.obt} / ${qSummary.max}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #e2e8f0; font-size: 12px;">
+              <span style="font-weight: 600; color: #334155;">1. Quarterly Examination :</span>
+              <span style="font-weight: bold; color: #0f172a;">${qSummary.obt} / ${qSummary.max}</span>
             </div>
-            <div class="flex justify-between items-center py-1.5 text-xs">
-              <span class="font-medium">2. Half Yearly Examination :</span>
-              <span class="font-bold text-gray-900">${curObtainedSum} / ${curMaxSum}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px;">
+              <span style="font-weight: 600; color: #334155;">2. Half Yearly Examination :</span>
+              <span style="font-weight: bold; color: #0f172a;">${curObtainedSum} / ${curMaxSum}</span>
             </div>
           `;
         } else { // Annual
           grandObtained = qSummary.obt + hySummary.obt + curObtainedSum;
           grandMax = qSummary.max + hySummary.max + curMaxSum;
           progressRowsHtml = `
-            <div class="flex justify-between items-center border-b border-gray-200 py-1 text-xs">
-              <span class="font-medium">1. Quarterly Examination :</span>
-              <span class="font-bold text-gray-900">${qSummary.obt} / ${qSummary.max}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #e2e8f0; font-size: 11.5px;">
+              <span style="font-weight: 600; color: #334155;">1. Quarterly Examination :</span>
+              <span style="font-weight: bold; color: #0f172a;">${qSummary.obt} / ${qSummary.max}</span>
             </div>
-            <div class="flex justify-between items-center border-b border-gray-200 py-1 text-xs">
-              <span class="font-medium">2. Half Yearly Examination :</span>
-              <span class="font-bold text-gray-900">${hySummary.obt} / ${hySummary.max}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #e2e8f0; font-size: 11.5px;">
+              <span style="font-weight: 600; color: #334155;">2. Half Yearly Examination :</span>
+              <span style="font-weight: bold; color: #0f172a;">${hySummary.obt} / ${hySummary.max}</span>
             </div>
-            <div class="flex justify-between items-center py-1 text-xs">
-              <span class="font-medium">3. Annual Examination :</span>
-              <span class="font-bold text-gray-900">${curObtainedSum} / ${curMaxSum}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 11.5px;">
+              <span style="font-weight: 600; color: #334155;">3. Annual Examination :</span>
+              <span style="font-weight: bold; color: #0f172a;">${curObtainedSum} / ${curMaxSum}</span>
             </div>
           `;
         }
@@ -780,115 +786,115 @@
         const attendancePercent = ((presentDays / workingDays) * 100).toFixed(2);
 
         const promotionHtml = isAnnual
-          ? `<div><span class="font-semibold text-gray-600">Promotion Status:</span> <span class="font-bold text-indigo-950">Promoted to ${getPromotedClass(stu.className)}</span></div>`
-          : `<div><span class="font-semibold text-gray-600">Status:</span> <span class="font-bold text-emerald-800">Progressing Satisfactorily</span></div>`;
+          ? `<div style="font-size: 11.5px;"><span style="font-weight: 600; color: #475569;">Promotion Status:</span> <span style="font-weight: bold; color: #1e1b4b;">Promoted to ${getPromotedClass(stu.className)}</span></div>`
+          : `<div style="font-size: 11.5px;"><span style="font-weight: 600; color: #475569;">Status:</span> <span style="font-weight: bold; color: #065f46;">Progressing Satisfactorily</span></div>`;
 
         const card = document.createElement('div');
-        card.className = 'report-card';
+        card.className = 'report-card-container';
         
         card.innerHTML = `
-          <!-- Top Header -->
-          <div>
-            <div class="flex justify-between text-[10px] font-semibold text-gray-700 border-b border-gray-400 pb-1 mb-2">
+          <!-- Header Area -->
+          <div style="width: 100%;">
+            <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; color: #334155; border-bottom: 1px solid #64748b; padding-bottom: 3px; margin-bottom: 6px;">
               <span>Recognition Number: GOP0958326469</span>
               <span>U-DISE Code: 09584109512</span>
             </div>
 
-            <div class="flex items-center justify-between gap-3 my-2">
-              <img src="${LOGO_URL}" class="w-16 h-16 object-contain" alt="Logo">
-              <div class="text-center flex-1">
-                <div class="text-[10.5px] font-bold text-gray-700 tracking-wide leading-tight">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
-                <h1 class="text-2xl font-extrabold tracking-wide text-indigo-950 mt-0.5">AMBEDKAR PUBLIC SCHOOL</h1>
-                <p class="text-[11px] font-medium text-gray-600 leading-tight">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 8px 0;">
+              <img src="${LOGO_URL}" style="width: 68px; height: 68px; object-fit: contain;" alt="Logo">
+              <div style="text-align: center; flex: 1;">
+                <div style="font-size: 11px; font-weight: bold; color: #334155; letter-spacing: 0.3px;">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
+                <h1 style="font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #1e1b4b; margin: 2px 0 0 0; line-height: 1.1;">AMBEDKAR PUBLIC SCHOOL</h1>
+                <p style="font-size: 11.5px; font-weight: 600; color: #475569; margin: 2px 0 0 0;">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
               </div>
-              <div class="w-16"></div>
+              <div style="width: 68px;"></div>
             </div>
 
             <!-- Title Banner -->
-            <div class="card-banner text-white text-center py-2 font-bold text-xs sm:text-sm tracking-wider uppercase rounded shadow-sm my-2.5">
+            <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: #ffffff; text-align: center; padding: 6px 0; font-weight: bold; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 6px 0 10px 0;">
               Result of ${targetExam} (${targetSession})
             </div>
 
-            <!-- Student Profile -->
-            <div class="border border-gray-400 p-3 rounded flex justify-between items-center my-2.5 text-xs bg-slate-50/50">
-              <div class="grid grid-cols-2 gap-x-6 gap-y-2 flex-1">
-                <div><span class="text-gray-500 font-medium">Student's Name:</span> <span class="font-bold text-gray-900 uppercase">${stu.studentName}</span></div>
-                <div><span class="text-gray-500 font-medium">Class & Sec:</span> <span class="font-bold text-gray-900">${stu.className} - ${stu.section}</span></div>
-                <div><span class="text-gray-500 font-medium">Student ID:</span> <span class="font-bold font-mono text-gray-900">${stu.studentId}</span></div>
-                <div><span class="text-gray-500 font-medium">Date of Birth:</span> <span class="font-semibold text-gray-900">${stu.dob || '—'}</span></div>
-                <div><span class="text-gray-500 font-medium">Mother's Name:</span> <span class="font-semibold text-gray-900">${stu.motherName || '—'}</span></div>
-                <div><span class="text-gray-500 font-medium">Father's Name:</span> <span class="font-semibold text-gray-900">${stu.fatherName}</span></div>
+            <!-- Student Profile Box -->
+            <div style="border: 1.5px solid #64748b; padding: 10px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background-color: #f8fafc;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; flex: 1; font-size: 11.5px;">
+                <div><span style="color: #64748b; font-weight: 500;">Student's Name:</span> <span style="font-weight: bold; color: #0f172a; text-transform: uppercase;">${stu.studentName}</span></div>
+                <div><span style="color: #64748b; font-weight: 500;">Class & Sec:</span> <span style="font-weight: bold; color: #0f172a;">${stu.className} - ${stu.section}</span></div>
+                <div><span style="color: #64748b; font-weight: 500;">Student ID:</span> <span style="font-weight: bold; font-family: monospace; color: #0f172a;">${stu.studentId}</span></div>
+                <div><span style="color: #64748b; font-weight: 500;">Date of Birth:</span> <span style="font-weight: 600; color: #0f172a;">${stu.dob || '—'}</span></div>
+                <div><span style="color: #64748b; font-weight: 500;">Mother's Name:</span> <span style="font-weight: 600; color: #0f172a;">${stu.motherName || '—'}</span></div>
+                <div><span style="color: #64748b; font-weight: 500;">Father's Name:</span> <span style="font-weight: 600; color: #0f172a;">${stu.fatherName}</span></div>
               </div>
-              <div class="w-20 h-24 border border-gray-400 bg-white p-0.5 rounded shrink-0 ml-4 shadow-sm">
-                <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded" alt="Student Photo">
+              <div style="width: 80px; height: 95px; border: 1.5px solid #64748b; background: #ffffff; padding: 2px; border-radius: 4px; flex-shrink: 0; margin-left: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; border-radius: 2px;" alt="Student Photo">
               </div>
             </div>
 
-            <!-- Performance Grids with Explicit Row Heights -->
-            <div class="grid grid-cols-12 gap-3.5 my-2.5 items-start">
+            <!-- Performance Grids Area -->
+            <div style="display: grid; grid-template-columns: 7fr 5fr; gap: 14px; margin-bottom: 10px; align-items: start;">
               
-              <!-- Scholastic Marks (Left) -->
-              <div class="col-span-7 border border-gray-400 rounded overflow-hidden">
-                <div class="bg-indigo-900 text-white font-bold text-center py-1.5 text-xs tracking-wider uppercase">
+              <!-- Scholastic Performance Table (Left) -->
+              <div style="border: 1.5px solid #475569; border-radius: 4px; overflow: hidden;">
+                <div style="background-color: #1e1b4b; color: #ffffff; font-weight: bold; text-align: center; padding: 5px 0; font-size: 11.5px; letter-spacing: 0.5px; text-transform: uppercase;">
                   Scholastic Performance (${targetExam})
                 </div>
-                <table class="w-full text-xs">
-                  <thead class="bg-indigo-50 font-bold border-b border-gray-400 h-8">
-                    <tr class="text-center">
-                      <th class="px-4 text-left w-[46%]">Subject</th>
-                      <th class="px-2 w-[18%]">Max</th>
-                      <th class="px-2 w-[18%]">Gained</th>
-                      <th class="px-2 w-[18%]">Grade</th>
+                <table class="report-table" style="font-size: 11.5px;">
+                  <thead style="background-color: #e0e7ff; font-weight: bold; height: 32px;">
+                    <tr style="text-align: center;">
+                      <th style="padding: 4px 12px; text-align: left; width: 46%;">Subject</th>
+                      <th style="padding: 4px; width: 18%;">Max</th>
+                      <th style="padding: 4px; width: 18%;">Gained</th>
+                      <th style="padding: 4px; width: 18%;">Grade</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${activeSubjectRows || '<tr><td colspan="4" class="text-center py-6 text-gray-400">कोई अंक उपलब्ध नहीं</td></tr>'}
+                    ${activeSubjectRows || '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #94a3b8;">कोई अंक उपलब्ध नहीं</td></tr>'}
                   </tbody>
-                  <tfoot class="bg-indigo-50 font-bold border-t border-gray-400 text-center h-8">
+                  <tfoot style="background-color: #e0e7ff; font-weight: bold; text-align: center; height: 34px;">
                     <tr>
-                      <td class="px-4 text-left">Total (${targetExam})</td>
-                      <td class="px-2">${curMaxSum}</td>
-                      <td class="px-2 text-indigo-900 font-extrabold">${curObtainedSum}</td>
-                      <td class="px-2 font-bold">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
+                      <td style="padding: 4px 12px; text-align: left; font-size: 12px;">Total (${targetExam})</td>
+                      <td style="padding: 4px; font-size: 12px;">${curMaxSum}</td>
+                      <td style="padding: 4px; color: #1e1b4b; font-weight: 900; font-size: 13px;">${curObtainedSum}</td>
+                      <td style="padding: 4px; font-size: 12px;">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
 
-              <!-- Right: Co-Scholastic & Attendance -->
-              <div class="col-span-5 flex flex-col gap-3">
+              <!-- Co-Scholastic & Attendance Area (Right) -->
+              <div style="display: flex; flex-direction: column; gap: 10px;">
                 
-                <!-- Co-Scholastic Areas -->
-                <div class="border border-gray-400 rounded overflow-hidden">
-                  <div class="bg-indigo-900 text-white font-bold text-center py-1.5 text-xs tracking-wider uppercase">
+                <!-- Co-Scholastic Table -->
+                <div style="border: 1.5px solid #475569; border-radius: 4px; overflow: hidden;">
+                  <div style="background-color: #1e1b4b; color: #ffffff; font-weight: bold; text-align: center; padding: 5px 0; font-size: 11.5px; letter-spacing: 0.5px; text-transform: uppercase;">
                     Co-Scholastic Areas
                   </div>
-                  <table class="w-full text-xs">
-                    <thead class="bg-indigo-50 font-bold border-b border-gray-400 h-8">
-                      <tr class="text-center">
-                        <th class="px-4 text-left">Areas</th>
-                        <th class="px-4 text-right">Grade</th>
+                  <table class="report-table" style="font-size: 11.5px;">
+                    <thead style="background-color: #e0e7ff; font-weight: bold; height: 32px;">
+                      <tr style="text-align: center;">
+                        <th style="padding: 4px 12px; text-align: left;">Areas</th>
+                        <th style="padding: 4px 12px; text-align: right;">Grade</th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
-                      <tr class="co-row"><td class="px-4">Discipline</td><td class="px-4 text-right font-medium">Well-Behaved</td></tr>
-                      <tr class="co-row"><td class="px-4">Cleanliness</td><td class="px-4 text-right font-medium">Maintained</td></tr>
-                      <tr class="co-row"><td class="px-4">Speaking Skill</td><td class="px-4 text-right font-medium">Articulate</td></tr>
-                      <tr class="co-row"><td class="px-4">Activity Participation</td><td class="px-4 text-right font-medium">Enthusiastic</td></tr>
-                      <tr class="co-row"><td class="px-4">Homework Regularity</td><td class="px-4 text-right font-medium">Consistent</td></tr>
+                    <tbody>
+                      <tr class="co-tr"><td style="padding: 4px 12px;">Discipline</td><td style="padding: 4px 12px; text-align: right; font-weight: 600;">Well-Behaved</td></tr>
+                      <tr class="co-tr"><td style="padding: 4px 12px;">Cleanliness</td><td style="padding: 4px 12px; text-align: right; font-weight: 600;">Maintained</td></tr>
+                      <tr class="co-tr"><td style="padding: 4px 12px;">Speaking Skill</td><td style="padding: 4px 12px; text-align: right; font-weight: 600;">Articulate</td></tr>
+                      <tr class="co-tr"><td style="padding: 4px 12px;">Activity Participation</td><td style="padding: 4px 12px; text-align: right; font-weight: 600;">Enthusiastic</td></tr>
+                      <tr class="co-tr"><td style="padding: 4px 12px;">Homework Regularity</td><td style="padding: 4px 12px; text-align: right; font-weight: 600;">Consistent</td></tr>
                     </tbody>
                   </table>
                 </div>
 
-                <!-- Attendance Record -->
-                <div class="border border-gray-400 rounded overflow-hidden">
-                  <div class="bg-indigo-900 text-white font-bold text-center py-1.5 text-xs tracking-wider uppercase">
+                <!-- Attendance Box -->
+                <div style="border: 1.5px solid #475569; border-radius: 4px; overflow: hidden;">
+                  <div style="background-color: #1e1b4b; color: #ffffff; font-weight: bold; text-align: center; padding: 5px 0; font-size: 11.5px; letter-spacing: 0.5px; text-transform: uppercase;">
                     Attendance Record
                   </div>
-                  <div class="p-3 text-xs space-y-1.5 bg-white">
-                    <div class="flex justify-between"><span>Working Days:</span><span class="font-bold">${workingDays}</span></div>
-                    <div class="flex justify-between"><span>Present Days:</span><span class="font-bold">${presentDays}</span></div>
-                    <div class="flex justify-between border-t border-gray-200 pt-1.5"><span>Attendance:</span><span class="font-bold text-indigo-900">${attendancePercent}%</span></div>
+                  <div style="padding: 8px 12px; font-size: 11.5px; background-color: #ffffff; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between;"><span>Working Days:</span><span style="font-weight: bold;">${workingDays}</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Present Days:</span><span style="font-weight: bold;">${presentDays}</span></div>
+                    <div style="display: flex; justify-content: space-between; border-top: 1px solid #cbd5e1; padding-top: 4px;"><span>Attendance:</span><span style="font-weight: bold; color: #1e1b4b;">${attendancePercent}%</span></div>
                   </div>
                 </div>
 
@@ -896,46 +902,48 @@
 
             </div>
 
-            <!-- Consolidated Summary Box (Row Heights Adjusted) -->
-            <div class="border border-indigo-900 rounded my-3 bg-indigo-50/40 p-3.5 text-xs">
-              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-1 mb-2 text-[11px] uppercase tracking-wider">CONSOLIDATED PROGRESS SUMMARY</div>
-              <div class="grid grid-cols-2 gap-x-6 items-center">
-                <div class="space-y-1">
+            <!-- Consolidated Summary Box -->
+            <div style="border: 1.5px solid #1e1b4b; border-radius: 6px; background-color: #eef2ff; padding: 10px 14px; margin-bottom: 8px;">
+              <div style="font-weight: bold; color: #1e1b4b; border-bottom: 1px solid #c7d2fe; padding-bottom: 4px; margin-bottom: 6px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px;">
+                CONSOLIDATED PROGRESS SUMMARY
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center;">
+                <div>
                   ${progressRowsHtml}
                 </div>
-                <div class="border-l border-indigo-200 pl-4 flex flex-col justify-center space-y-2">
-                  <div class="flex justify-between items-center"><span class="text-gray-600 font-medium">Grand Total:</span><span class="font-bold text-sm text-indigo-950">${grandObtained} / ${grandMax}</span></div>
-                  <div class="flex justify-between items-center"><span class="text-gray-600 font-medium">Percentage:</span><span class="font-bold text-sm text-indigo-950">${finalPercentage}%</span></div>
-                  <div class="flex justify-between items-center"><span class="text-gray-600 font-medium">Overall Grade:</span><span class="font-bold text-sm text-indigo-950">${overallGrade}</span></div>
+                <div style="border-left: 1px solid #c7d2fe; padding-left: 16px; display: flex; flex-direction: column; gap: 6px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;"><span style="color: #475569; font-weight: 600; font-size: 12px;">Grand Total:</span><span style="font-weight: 900; font-size: 14px; color: #1e1b4b;">${grandObtained} / ${grandMax}</span></div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;"><span style="color: #475569; font-weight: 600; font-size: 12px;">Percentage:</span><span style="font-weight: 900; font-size: 14px; color: #1e1b4b;">${finalPercentage}%</span></div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;"><span style="color: #475569; font-weight: 600; font-size: 12px;">Overall Grade:</span><span style="font-weight: 900; font-size: 14px; color: #1e1b4b;">${overallGrade}</span></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Bottom Remarks, QR Code & Signatures -->
-          <div class="border-t border-gray-400 pt-3 mt-auto">
-            <div class="flex justify-between items-center text-xs mb-4">
-              <div><span class="font-semibold text-gray-600">Teacher's Remark:</span> <span class="font-medium italic">Shows consistent progress, good conduct and focus.</span></div>
+          <!-- Bottom Remarks & Signatures Footer -->
+          <div style="border-top: 1.5px solid #64748b; padding-top: 8px; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div style="font-size: 11.5px;"><span style="font-weight: 600; color: #475569;">Teacher's Remark:</span> <span style="font-style: italic; font-weight: 600;">Shows consistent progress, good conduct and focus.</span></div>
               ${promotionHtml}
             </div>
 
-            <div class="flex justify-between items-end pt-6 pb-1 text-center text-xs font-bold text-gray-800">
-              <div class="flex flex-col items-center">
-                <div id="qr_${studentId}" class="mb-1 p-0.5 border border-gray-300 rounded bg-white"></div>
-                <span class="text-[9px] text-gray-500 font-normal">Scan to Verify</span>
-                <span class="text-[9px] text-gray-500 font-normal">Date: ${new Date().toLocaleDateString('en-GB')}</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 8px; text-align: center; font-weight: bold; font-size: 11.5px; color: #0f172a;">
+              <div style="display: flex; flex-direction: column; items: center;">
+                <div id="qr_${studentId}" style="margin-bottom: 2px; padding: 2px; border: 1px solid #cbd5e1; border-radius: 4px; background: #ffffff;"></div>
+                <span style="font-size: 9px; color: #64748b; font-weight: normal;">Scan to Verify</span>
+                <span style="font-size: 9px; color: #64748b; font-weight: normal;">Date: ${new Date().toLocaleDateString('en-GB')}</span>
               </div>
 
-              <div class="flex flex-col items-center">
-                <div class="h-12"></div>
-                <div class="border-t border-gray-800 w-36 pt-1">Class Teacher</div>
+              <div style="display: flex; flex-direction: column; items: center;">
+                <div style="height: 38px;"></div>
+                <div style="border-top: 1.5px solid #0f172a; width: 140px; padding-top: 4px;">Class Teacher</div>
               </div>
 
-              <div class="flex flex-col items-center">
-                <div class="h-12"></div>
-                <div class="border-t border-gray-800 w-48 pt-1">
+              <div style="display: flex; flex-direction: column; items: center;">
+                <div style="height: 38px;"></div>
+                <div style="border-top: 1.5px solid #0f172a; width: 180px; padding-top: 4px;">
                   <div>Principal's Stamp & Signature</div>
-                  <div class="text-[9px] text-gray-500 font-normal">Ambedkar Public School</div>
+                  <div style="font-size: 9px; color: #64748b; font-weight: normal; margin-top: 2px;">Ambedkar Public School</div>
                 </div>
               </div>
             </div>
