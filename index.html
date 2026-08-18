@@ -95,21 +95,20 @@
     }
 
     /* -------------------------------------------------------------
-       4. REPORT CARD EXACT A4 SAME-TO-SAME UI & PRINT STYLING
+       4. REPORT CARD EXACT A4 FULL-PAGE EXPANDED PRINT STYLING
     ------------------------------------------------------------- */
     @page {
       size: A4 portrait;
-      margin: 8mm 6mm;
+      margin: 6mm;
     }
     
     .report-card {
-      width: 194mm;
-      height: 278mm;
-      max-height: 278mm;
+      width: 198mm;
+      min-height: 284mm;
       margin: 0 auto 10mm auto;
       background-color: #ffffff;
       border: 2px solid #1e293b;
-      padding: 6mm 7mm;
+      padding: 6mm 8mm;
       box-sizing: border-box;
       position: relative;
       display: flex;
@@ -121,10 +120,18 @@
       background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
     }
 
+    /* Fixed Spacious Row Heights for Crisp Alignment */
+    .sch-row {
+      height: 30px !important;
+    }
+    .co-row {
+      height: 27px !important;
+    }
+
     @media print {
       html, body {
-        width: 210mm !important;
-        height: 297mm !important;
+        width: 100% !important;
+        height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -144,11 +151,13 @@
         margin: 0 !important;
       }
       .report-card {
-        width: 194mm !important;
-        height: 278mm !important;
-        max-height: 278mm !important;
+        width: 100% !important;
+        max-width: 198mm !important;
+        height: 284mm !important;
+        min-height: 284mm !important;
+        max-height: 284mm !important;
         margin: 0 auto !important;
-        padding: 6mm 7mm !important;
+        padding: 6mm 8mm !important;
         box-sizing: border-box !important;
         border: 2px solid #000000 !important;
         page-break-after: always !important;
@@ -626,7 +635,7 @@
     }
 
     // ============================================================
-    // REPORT CARD BUILDER (1:1 Same-to-Same Full Page Fit)
+    // REPORT CARD BUILDER (1:1 Exact Full-Page A4 Layout)
     // ============================================================
     function handlePrintResult() {
       const selectedIds = Array.from(document.querySelectorAll('.student-check:checked')).map(cb => cb.value);
@@ -684,11 +693,11 @@
             curMaxSum += 100;
 
             activeSubjectRows += `
-              <tr class="border-b border-gray-300 text-center text-[11px]">
-                <td class="py-1.5 px-3 text-left font-semibold w-[48%] leading-relaxed">${getSubjectFullName(subCode)}</td>
-                <td class="py-1.5 px-2 w-[16%]">100</td>
-                <td class="py-1.5 px-2 w-[18%] font-bold text-gray-900">${scaledMark}</td>
-                <td class="py-1.5 px-2 w-[18%] font-semibold text-gray-700">${subGrade}</td>
+              <tr class="sch-row border-b border-gray-300 text-center text-xs">
+                <td class="px-4 text-left font-semibold w-[46%] leading-relaxed">${getSubjectFullName(subCode)}</td>
+                <td class="px-2 w-[18%]">100</td>
+                <td class="px-2 w-[18%] font-bold text-gray-900">${scaledMark}</td>
+                <td class="px-2 w-[18%] font-semibold text-gray-700">${subGrade}</td>
               </tr>
             `;
           }
@@ -727,7 +736,7 @@
           grandObtained = curObtainedSum;
           grandMax = curMaxSum;
           progressRowsHtml = `
-            <div class="flex justify-between py-1 text-xs">
+            <div class="flex justify-between items-center py-2 text-xs">
               <span class="font-medium">1. Quarterly Examination :</span>
               <span class="font-bold text-gray-900">${curObtainedSum} / ${curMaxSum}</span>
             </div>
@@ -736,11 +745,11 @@
           grandObtained = qSummary.obt + curObtainedSum;
           grandMax = qSummary.max + curMaxSum;
           progressRowsHtml = `
-            <div class="flex justify-between border-b border-gray-200 py-1 text-xs">
+            <div class="flex justify-between items-center border-b border-gray-200 py-1.5 text-xs">
               <span class="font-medium">1. Quarterly Examination :</span>
               <span class="font-bold text-gray-900">${qSummary.obt} / ${qSummary.max}</span>
             </div>
-            <div class="flex justify-between py-1 text-xs">
+            <div class="flex justify-between items-center py-1.5 text-xs">
               <span class="font-medium">2. Half Yearly Examination :</span>
               <span class="font-bold text-gray-900">${curObtainedSum} / ${curMaxSum}</span>
             </div>
@@ -749,15 +758,15 @@
           grandObtained = qSummary.obt + hySummary.obt + curObtainedSum;
           grandMax = qSummary.max + hySummary.max + curMaxSum;
           progressRowsHtml = `
-            <div class="flex justify-between border-b border-gray-200 py-1 text-xs">
+            <div class="flex justify-between items-center border-b border-gray-200 py-1 text-xs">
               <span class="font-medium">1. Quarterly Examination :</span>
               <span class="font-bold text-gray-900">${qSummary.obt} / ${qSummary.max}</span>
             </div>
-            <div class="flex justify-between border-b border-gray-200 py-1 text-xs">
+            <div class="flex justify-between items-center border-b border-gray-200 py-1 text-xs">
               <span class="font-medium">2. Half Yearly Examination :</span>
               <span class="font-bold text-gray-900">${hySummary.obt} / ${hySummary.max}</span>
             </div>
-            <div class="flex justify-between py-1 text-xs">
+            <div class="flex justify-between items-center py-1 text-xs">
               <span class="font-medium">3. Annual Examination :</span>
               <span class="font-bold text-gray-900">${curObtainedSum} / ${curMaxSum}</span>
             </div>
@@ -778,31 +787,31 @@
         card.className = 'report-card';
         
         card.innerHTML = `
-          <!-- Header Area -->
+          <!-- Top Header -->
           <div>
-            <div class="flex justify-between text-[9.5px] font-semibold text-gray-700 border-b border-gray-400 pb-1 mb-1.5">
+            <div class="flex justify-between text-[10px] font-semibold text-gray-700 border-b border-gray-400 pb-1 mb-2">
               <span>Recognition Number: GOP0958326469</span>
               <span>U-DISE Code: 09584109512</span>
             </div>
 
-            <div class="flex items-center justify-between gap-3 my-1.5">
-              <img src="${LOGO_URL}" class="w-14 h-14 object-contain" alt="Logo">
+            <div class="flex items-center justify-between gap-3 my-2">
+              <img src="${LOGO_URL}" class="w-16 h-16 object-contain" alt="Logo">
               <div class="text-center flex-1">
-                <div class="text-[9.5px] font-bold text-gray-700 tracking-wide leading-tight">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
-                <h1 class="text-xl font-extrabold tracking-wide text-indigo-950 mt-0.5">AMBEDKAR PUBLIC SCHOOL</h1>
-                <p class="text-[10px] font-medium text-gray-600 leading-tight">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
+                <div class="text-[10.5px] font-bold text-gray-700 tracking-wide leading-tight">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
+                <h1 class="text-2xl font-extrabold tracking-wide text-indigo-950 mt-0.5">AMBEDKAR PUBLIC SCHOOL</h1>
+                <p class="text-[11px] font-medium text-gray-600 leading-tight">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
               </div>
-              <div class="w-14"></div>
+              <div class="w-16"></div>
             </div>
 
             <!-- Title Banner -->
-            <div class="card-banner text-white text-center py-1.5 font-bold text-xs sm:text-sm tracking-wider uppercase rounded shadow-sm my-2">
+            <div class="card-banner text-white text-center py-2 font-bold text-xs sm:text-sm tracking-wider uppercase rounded shadow-sm my-2.5">
               Result of ${targetExam} (${targetSession})
             </div>
 
             <!-- Student Profile -->
-            <div class="border border-gray-400 p-2.5 rounded flex justify-between items-center my-2 text-xs bg-slate-50/50">
-              <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 flex-1">
+            <div class="border border-gray-400 p-3 rounded flex justify-between items-center my-2.5 text-xs bg-slate-50/50">
+              <div class="grid grid-cols-2 gap-x-6 gap-y-2 flex-1">
                 <div><span class="text-gray-500 font-medium">Student's Name:</span> <span class="font-bold text-gray-900 uppercase">${stu.studentName}</span></div>
                 <div><span class="text-gray-500 font-medium">Class & Sec:</span> <span class="font-bold text-gray-900">${stu.className} - ${stu.section}</span></div>
                 <div><span class="text-gray-500 font-medium">Student ID:</span> <span class="font-bold font-mono text-gray-900">${stu.studentId}</span></div>
@@ -810,76 +819,76 @@
                 <div><span class="text-gray-500 font-medium">Mother's Name:</span> <span class="font-semibold text-gray-900">${stu.motherName || '—'}</span></div>
                 <div><span class="text-gray-500 font-medium">Father's Name:</span> <span class="font-semibold text-gray-900">${stu.fatherName}</span></div>
               </div>
-              <div class="w-20 h-24 border border-gray-400 bg-white p-0.5 rounded shrink-0 ml-3 shadow-sm">
+              <div class="w-20 h-24 border border-gray-400 bg-white p-0.5 rounded shrink-0 ml-4 shadow-sm">
                 <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded" alt="Student Photo">
               </div>
             </div>
 
-            <!-- Performance Grids -->
-            <div class="grid grid-cols-12 gap-3 my-2 items-start">
+            <!-- Performance Grids with Explicit Row Heights -->
+            <div class="grid grid-cols-12 gap-3.5 my-2.5 items-start">
               
               <!-- Scholastic Marks (Left) -->
               <div class="col-span-7 border border-gray-400 rounded overflow-hidden">
-                <div class="bg-indigo-900 text-white font-bold text-center py-1 text-[11px] tracking-wider uppercase">
+                <div class="bg-indigo-900 text-white font-bold text-center py-1.5 text-xs tracking-wider uppercase">
                   Scholastic Performance (${targetExam})
                 </div>
                 <table class="w-full text-xs">
-                  <thead class="bg-indigo-50 font-bold border-b border-gray-400">
+                  <thead class="bg-indigo-50 font-bold border-b border-gray-400 h-8">
                     <tr class="text-center">
-                      <th class="py-1 px-3 text-left w-[48%]">Subject</th>
-                      <th class="py-1 px-2 w-[16%]">Max</th>
-                      <th class="py-1 px-2 w-[18%]">Gained</th>
-                      <th class="py-1 px-2 w-[18%]">Grade</th>
+                      <th class="px-4 text-left w-[46%]">Subject</th>
+                      <th class="px-2 w-[18%]">Max</th>
+                      <th class="px-2 w-[18%]">Gained</th>
+                      <th class="px-2 w-[18%]">Grade</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${activeSubjectRows || '<tr><td colspan="4" class="text-center py-4 text-gray-400">कोई अंक उपलब्ध नहीं</td></tr>'}
+                    ${activeSubjectRows || '<tr><td colspan="4" class="text-center py-6 text-gray-400">कोई अंक उपलब्ध नहीं</td></tr>'}
                   </tbody>
-                  <tfoot class="bg-indigo-50 font-bold border-t border-gray-400 text-center">
+                  <tfoot class="bg-indigo-50 font-bold border-t border-gray-400 text-center h-8">
                     <tr>
-                      <td class="py-1.5 px-3 text-left font-bold">Total (${targetExam})</td>
-                      <td class="py-1.5 px-2">${curMaxSum}</td>
-                      <td class="py-1.5 px-2 text-indigo-900 font-extrabold">${curObtainedSum}</td>
-                      <td class="py-1.5 px-2 font-bold">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
+                      <td class="px-4 text-left">Total (${targetExam})</td>
+                      <td class="px-2">${curMaxSum}</td>
+                      <td class="px-2 text-indigo-900 font-extrabold">${curObtainedSum}</td>
+                      <td class="px-2 font-bold">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
 
               <!-- Right: Co-Scholastic & Attendance -->
-              <div class="col-span-5 flex flex-col gap-2">
+              <div class="col-span-5 flex flex-col gap-3">
                 
                 <!-- Co-Scholastic Areas -->
                 <div class="border border-gray-400 rounded overflow-hidden">
-                  <div class="bg-indigo-900 text-white font-bold text-center py-1 text-[11px] tracking-wider uppercase">
+                  <div class="bg-indigo-900 text-white font-bold text-center py-1.5 text-xs tracking-wider uppercase">
                     Co-Scholastic Areas
                   </div>
                   <table class="w-full text-xs">
-                    <thead class="bg-indigo-50 font-bold border-b border-gray-400">
+                    <thead class="bg-indigo-50 font-bold border-b border-gray-400 h-8">
                       <tr class="text-center">
-                        <th class="py-1 px-3 text-left">Areas</th>
-                        <th class="py-1 px-3 text-right">Grade</th>
+                        <th class="px-4 text-left">Areas</th>
+                        <th class="px-4 text-right">Grade</th>
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                      <tr><td class="py-1 px-3">Discipline</td><td class="py-1 px-3 text-right font-medium">Well-Behaved</td></tr>
-                      <tr><td class="py-1 px-3">Cleanliness</td><td class="py-1 px-3 text-right font-medium">Maintained</td></tr>
-                      <tr><td class="py-1 px-3">Speaking Skill</td><td class="py-1 px-3 text-right font-medium">Articulate</td></tr>
-                      <tr><td class="py-1 px-3">Activity Participation</td><td class="py-1 px-3 text-right font-medium">Enthusiastic</td></tr>
-                      <tr><td class="py-1 px-3">Homework Regularity</td><td class="py-1 px-3 text-right font-medium">Consistent</td></tr>
+                      <tr class="co-row"><td class="px-4">Discipline</td><td class="px-4 text-right font-medium">Well-Behaved</td></tr>
+                      <tr class="co-row"><td class="px-4">Cleanliness</td><td class="px-4 text-right font-medium">Maintained</td></tr>
+                      <tr class="co-row"><td class="px-4">Speaking Skill</td><td class="px-4 text-right font-medium">Articulate</td></tr>
+                      <tr class="co-row"><td class="px-4">Activity Participation</td><td class="px-4 text-right font-medium">Enthusiastic</td></tr>
+                      <tr class="co-row"><td class="px-4">Homework Regularity</td><td class="px-4 text-right font-medium">Consistent</td></tr>
                     </tbody>
                   </table>
                 </div>
 
                 <!-- Attendance Record -->
                 <div class="border border-gray-400 rounded overflow-hidden">
-                  <div class="bg-indigo-900 text-white font-bold text-center py-1 text-[11px] tracking-wider uppercase">
+                  <div class="bg-indigo-900 text-white font-bold text-center py-1.5 text-xs tracking-wider uppercase">
                     Attendance Record
                   </div>
-                  <div class="p-2 text-xs space-y-1 bg-white">
+                  <div class="p-3 text-xs space-y-1.5 bg-white">
                     <div class="flex justify-between"><span>Working Days:</span><span class="font-bold">${workingDays}</span></div>
                     <div class="flex justify-between"><span>Present Days:</span><span class="font-bold">${presentDays}</span></div>
-                    <div class="flex justify-between border-t border-gray-200 pt-0.5"><span>Attendance:</span><span class="font-bold text-indigo-900">${attendancePercent}%</span></div>
+                    <div class="flex justify-between border-t border-gray-200 pt-1.5"><span>Attendance:</span><span class="font-bold text-indigo-900">${attendancePercent}%</span></div>
                   </div>
                 </div>
 
@@ -887,14 +896,14 @@
 
             </div>
 
-            <!-- Consolidated Summary Box with Overall Card on Right -->
-            <div class="border border-indigo-900 rounded my-2 bg-indigo-50/40 p-2.5 text-xs">
-              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-0.5 mb-1.5 text-[10.5px] uppercase tracking-wider">CONSOLIDATED PROGRESS SUMMARY</div>
+            <!-- Consolidated Summary Box (Row Heights Adjusted) -->
+            <div class="border border-indigo-900 rounded my-3 bg-indigo-50/40 p-3.5 text-xs">
+              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-1 mb-2 text-[11px] uppercase tracking-wider">CONSOLIDATED PROGRESS SUMMARY</div>
               <div class="grid grid-cols-2 gap-x-6 items-center">
-                <div class="space-y-0.5">
+                <div class="space-y-1">
                   ${progressRowsHtml}
                 </div>
-                <div class="border-l border-indigo-200 pl-4 flex flex-col justify-center space-y-1">
+                <div class="border-l border-indigo-200 pl-4 flex flex-col justify-center space-y-2">
                   <div class="flex justify-between items-center"><span class="text-gray-600 font-medium">Grand Total:</span><span class="font-bold text-sm text-indigo-950">${grandObtained} / ${grandMax}</span></div>
                   <div class="flex justify-between items-center"><span class="text-gray-600 font-medium">Percentage:</span><span class="font-bold text-sm text-indigo-950">${finalPercentage}%</span></div>
                   <div class="flex justify-between items-center"><span class="text-gray-600 font-medium">Overall Grade:</span><span class="font-bold text-sm text-indigo-950">${overallGrade}</span></div>
@@ -904,29 +913,29 @@
           </div>
 
           <!-- Bottom Remarks, QR Code & Signatures -->
-          <div class="border-t border-gray-400 pt-2.5">
-            <div class="flex justify-between items-center text-xs mb-3">
+          <div class="border-t border-gray-400 pt-3 mt-auto">
+            <div class="flex justify-between items-center text-xs mb-4">
               <div><span class="font-semibold text-gray-600">Teacher's Remark:</span> <span class="font-medium italic">Shows consistent progress, good conduct and focus.</span></div>
               ${promotionHtml}
             </div>
 
-            <div class="flex justify-between items-end pt-4 pb-0.5 text-center text-xs font-bold text-gray-800">
+            <div class="flex justify-between items-end pt-6 pb-1 text-center text-xs font-bold text-gray-800">
               <div class="flex flex-col items-center">
-                <div id="qr_${studentId}" class="mb-0.5 p-0.5 border border-gray-300 rounded bg-white"></div>
-                <span class="text-[8.5px] text-gray-500 font-normal">Scan to Verify</span>
-                <span class="text-[8.5px] text-gray-500 font-normal">Date: ${new Date().toLocaleDateString('en-GB')}</span>
+                <div id="qr_${studentId}" class="mb-1 p-0.5 border border-gray-300 rounded bg-white"></div>
+                <span class="text-[9px] text-gray-500 font-normal">Scan to Verify</span>
+                <span class="text-[9px] text-gray-500 font-normal">Date: ${new Date().toLocaleDateString('en-GB')}</span>
               </div>
 
               <div class="flex flex-col items-center">
-                <div class="h-8"></div>
+                <div class="h-12"></div>
                 <div class="border-t border-gray-800 w-36 pt-1">Class Teacher</div>
               </div>
 
               <div class="flex flex-col items-center">
-                <div class="h-8"></div>
+                <div class="h-12"></div>
                 <div class="border-t border-gray-800 w-48 pt-1">
                   <div>Principal's Stamp & Signature</div>
-                  <div class="text-[8.5px] text-gray-500 font-normal">Ambedkar Public School</div>
+                  <div class="text-[9px] text-gray-500 font-normal">Ambedkar Public School</div>
                 </div>
               </div>
             </div>
@@ -937,8 +946,8 @@
 
         new QRCode(document.getElementById(`qr_${studentId}`), {
           text: `APS MADHOPUR | Student: ${stu.studentName} | ID: ${stu.studentId} | Class: ${stu.className} | Session: ${targetSession} | Status: ${isAnnual ? 'PROMOTED' : 'PASS'}`,
-          width: 42,
-          height: 42,
+          width: 44,
+          height: 44,
           colorDark: "#1e1b4b",
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.M
