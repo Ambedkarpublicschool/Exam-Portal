@@ -10,18 +10,28 @@
   
   <style>
     /* -------------------------------------------------------------
-       1. FREEZE HEADER (Sticky Like Google Sheets)
+       1. FREEZE HEADER WITH SOLID OPAQUE BACKGROUND
     ------------------------------------------------------------- */
     .table-scroll-container {
       max-height: calc(100vh - 120px);
       overflow-y: auto;
       position: relative;
+      background-color: #ffffff;
+    }
+    
+    /* Ensure Header has 100% solid non-transparent background */
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 30;
     }
     thead th {
       position: sticky;
       top: 0;
-      z-index: 20;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      z-index: 30;
+      background-color: #e0e7ff !important; /* Solid Indigo-100 */
+      box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.15);
+      opacity: 1 !important;
     }
 
     /* -------------------------------------------------------------
@@ -35,7 +45,6 @@
         max-height: calc(100vh - 100px);
       }
 
-      /* Compact table styling for mobile */
       table {
         table-layout: fixed;
         width: 100%;
@@ -88,14 +97,13 @@
     @media print {
       .no-print { display: none !important; }
       .table-scroll-container { max-height: none !important; overflow: visible !important; }
-      thead th { position: static !important; }
+      thead th { position: static !important; background-color: #f3f4f6 !important; }
       body { background: white; color: black; }
       table { border-collapse: collapse; width: 100%; font-size: 11px; }
       th, td { border: 1px solid #000 !important; padding: 4px 6px !important; }
       input { border: none !important; background: transparent !important; }
     }
 
-    /* Remove spin arrows */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
@@ -131,7 +139,7 @@
       <!-- Session Filter -->
       <div>
         <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Session</label>
-        <select id="filterSession" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
+        <select id="filterSession" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
           <option value="">लोड...</option>
         </select>
       </div>
@@ -139,7 +147,7 @@
       <!-- Exam Name Filter -->
       <div>
         <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Exam</label>
-        <select id="filterExam" onchange="onExamChange()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
+        <select id="filterExam" onchange="onExamChange()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
           <option value="">परीक्षा चुनें</option>
         </select>
       </div>
@@ -147,7 +155,7 @@
       <!-- Class Filter -->
       <div>
         <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Class</label>
-        <select id="filterClass" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
+        <select id="filterClass" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
           <option value="ALL">All</option>
         </select>
       </div>
@@ -155,7 +163,7 @@
       <!-- Section Filter -->
       <div>
         <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Sec</label>
-        <select id="filterSection" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
+        <select id="filterSection" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
           <option value="ALL">All</option>
         </select>
       </div>
@@ -163,28 +171,27 @@
       <!-- Search Box -->
       <div>
         <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Search</label>
-        <input type="text" id="filterSearch" oninput="applyFilters()" placeholder="खोजें..." class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
+        <input type="text" id="filterSearch" oninput="applyFilters()" placeholder="खोजें..." class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500 bg-white">
       </div>
 
     </div>
   </div>
 
-  <!-- Table Container with Frozen Header Scroll -->
+  <!-- Table Container with Solid Frozen Header Scroll -->
   <main class="max-w-7xl mx-auto px-1 sm:px-2 pb-6">
     <div id="loadingStatus" class="text-center py-8 font-medium text-indigo-600 text-xs sm:text-sm">
       <i class="fa-solid fa-spinner fa-spin text-xl mb-1.5"></i><br>लोड हो रहा है, प्रतीक्षा करें...
     </div>
 
     <div id="tableContainer" class="bg-white rounded-lg shadow-sm border border-gray-200 hidden">
-      <!-- Fixed Height Scrolling Container -->
       <div class="table-scroll-container">
-        <table class="border-collapse">
-          <thead class="bg-indigo-100 text-indigo-950 font-bold border-b border-indigo-200 select-none">
+        <table class="border-collapse w-full">
+          <thead class="text-indigo-950 font-bold border-b border-indigo-200 select-none">
             <tr id="tableHeaderRow">
               <!-- Dynamic Headers -->
             </tr>
           </thead>
-          <tbody id="studentTableBody" class="divide-y divide-gray-200">
+          <tbody id="studentTableBody" class="divide-y divide-gray-200 bg-white">
             <!-- Dynamic Rows -->
           </tbody>
         </table>
@@ -337,7 +344,7 @@
 
       state.filteredStudents.forEach((stu, idx) => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-indigo-50/40 transition border-b border-gray-200";
+        tr.className = "hover:bg-indigo-50/40 transition border-b border-gray-200 bg-white";
         
         const compositeKey = `${currentSession}_${stu.studentId}_${currentExam}`;
         const studentSavedMarks = state.savedMarks[compositeKey] || {};
