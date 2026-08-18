@@ -152,7 +152,7 @@
             <i class="fa-solid fa-print"></i> प्रिंट
           </button>
           <button onclick="handlePrintResult()" class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded text-xs font-medium shadow flex items-center gap-1">
-            <i class="fa-solid fa-file-lines"></i> रिजल्ट (<span id="selectedCount">0</span>)[span_0](start_span)[span_0](end_span)
+            <i class="fa-solid fa-file-lines"></i> रिजल्ट (<span id="selectedCount">0</span>)
           </button>
         </div>
       </div>
@@ -279,6 +279,62 @@
       return SUBJECT_MAP[code] || code;
     }
 
+    // Number to Words Converter for Indian Date Format (DOB In Words)
+    function numberToWords(num) {
+      const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+                    'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+      const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+      
+      num = parseInt(num, 10);
+      if (isNaN(num) || num === 0) return '';
+      if (num < 20) return ones[num];
+      if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
+      if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 !== 0 ? ' ' + numberToWords(num % 100) : '');
+      if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 !== 0 ? ' ' + numberToWords(num % 1000) : '');
+      return num.toString();
+    }
+
+    function dobToWords(dobStr) {
+      if (!dobStr) return '';
+      // Support formats like 09/Jan/2020, 09-01-2020, 09/01/2020, 09 Jan 2020
+      const clean = dobStr.trim().replace(/[-/]/g, ' ');
+      const parts = clean.split(/\s+/);
+      if (parts.length < 3) return dobStr;
+
+      const dayNum = parseInt(parts[0], 10);
+      const yearNum = parseInt(parts[2], 10);
+
+      const ordinals = {
+        1: 'First', 2: 'Second', 3: 'Third', 4: 'Fourth', 5: 'Fifth',
+        6: 'Sixth', 7: 'Seventh', 8: 'Eighth', 9: 'Ninth', 10: 'Tenth',
+        11: 'Eleventh', 12: 'Twelfth', 13: 'Thirteenth', 14: 'Fourteenth', 15: 'Fifteenth',
+        16: 'Sixteenth', 17: 'Seventeenth', 18: 'Eighteenth', 19: 'Nineteenth', 20: 'Twentieth',
+        21: 'Twenty First', 22: 'Twenty Second', 23: 'Twenty Third', 24: 'Twenty Fourth', 25: 'Twenty Fifth',
+        26: 'Twenty Sixth', 27: 'Twenty Seventh', 28: 'Twenty Eighth', 29: 'Twenty Ninth', 30: 'Thirtieth', 31: 'Thirty First'
+      };
+
+      const monthNames = {
+        '1': 'January', '01': 'January', 'JAN': 'January', 'JANUARY': 'January',
+        '2': 'February', '02': 'February', 'FEB': 'February', 'FEBRUARY': 'February',
+        '3': 'March', '03': 'March', 'MAR': 'March', 'MARCH': 'March',
+        '4': 'April', '04': 'April', 'APR': 'April', 'APRIL': 'April',
+        '5': 'May', '05': 'May', 'MAY': 'May',
+        '6': 'June', '06': 'June', 'JUN': 'June', 'JUNE': 'June',
+        '7': 'July', '07': 'July', 'JUL': 'July', 'JULY': 'July',
+        '8': 'August', '08': 'August', 'AUG': 'August', 'AUGUST': 'August',
+        '9': 'September', '09': 'September', 'SEP': 'September', 'SEPTEMBER': 'September',
+        '10': 'October', 'OCT': 'October', 'OCTOBER': 'October',
+        '11': 'November', 'NOV': 'November', 'NOVEMBER': 'November',
+        '12': 'December', 'DEC': 'December', 'DECEMBER': 'December'
+      };
+
+      const dayWord = ordinals[dayNum] || numberToWords(dayNum);
+      const monthWord = monthNames[parts[1].toUpperCase()] || parts[1];
+      const yearWord = numberToWords(yearNum);
+
+      return `${dayWord} ${monthWord} ${yearWord}`.trim();
+    }
+
     let state = {
       sessions: [],
       exams: [],
@@ -331,7 +387,6 @@
       return map[cls] || `${cls} (Promoted)`;
     }
 
-    // Dynamic Scaled Total Calculator based on Selected Exam Cumulative Hierarchy
     function getStudentCumulativeTotal(studentId, session, selectedExam) {
       const isAnnual = selectedExam.toLowerCase().includes("annual");
       const isHalfYearly = selectedExam.toLowerCase().includes("half");
@@ -443,7 +498,6 @@
         <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('className')">Class</th>
         <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('section')">Sec</th>
         
-        <!-- Total Marks Column for Topper Ranking (Click to Sort) -->
         <th class="p-1 sm:p-2 text-center cursor-pointer bg-indigo-200/80 hover:bg-indigo-300 transition text-indigo-950 font-extrabold border-r border-indigo-300" onclick="sortTable('calculatedTotal')">
           Total Marks <i class="fa-solid fa-sort ml-1 text-xs"></i>
         </th>
@@ -475,7 +529,6 @@
         return matchSession && matchClass && matchSec && (!q || isExactId || isNameMatch);
       });
 
-      // Attach dynamic calculatedTotal property to each student object for instant sorting
       state.filteredStudents.forEach(stu => {
         stu.calculatedTotal = getStudentCumulativeTotal(stu.studentId, currentSession, currentExam);
       });
@@ -512,7 +565,6 @@
           <td class="pc-only p-2 text-center border-r border-gray-200">${stu.className}</td>
           <td class="pc-only p-2 text-center border-r border-gray-200">${stu.section}</td>
           
-          <!-- Scaled Cumulative Total Cell -->
           <td class="p-1 sm:p-2 text-center font-extrabold text-indigo-900 bg-indigo-50/50 border-r border-gray-200 text-xs sm:text-sm">
             ${totalMarksDisplay}
           </td>
@@ -588,7 +640,6 @@
 
         state.savedMarks[key][subject] = value;
 
-        // Also update local rawMarksList so total recalculates instantly
         let rawEntry = state.rawMarksList.find(m => m.session === session && m.studentId === studentId && m.examName === examName);
         if (rawEntry) {
           rawEntry.marks[subject] = value;
@@ -601,7 +652,7 @@
         setTimeout(() => {
           input.classList.remove('bg-emerald-50/50');
           input.classList.add('border-gray-300');
-          renderTableRows(); // Refresh total column view
+          renderTableRows();
         }, 1200);
       } catch (err) {
         input.classList.remove('border-amber-400', 'bg-amber-50');
@@ -627,7 +678,6 @@
         state.sortAsc = !state.sortAsc;
       } else {
         state.sortCol = key;
-        // Default to Descending (Highest to Lowest) for Total Marks sorting
         state.sortAsc = key === 'calculatedTotal' ? false : true;
       }
 
@@ -785,6 +835,9 @@
           ? `<div style="font-size: 11.5px;"><span style="font-weight: bold;">Promotion Status:</span> <span style="font-weight: bold; color: #1e1b4b;">Promoted to ${getPromotedClass(stu.className)}</span></div>`
           : `<div style="font-size: 11.5px;"><span style="font-weight: bold;">Status:</span> <span style="font-weight: bold; color: #065f46;">Progressing Satisfactorily</span></div>`;
 
+        // Generate DOB In Words String
+        const dobInWordsText = stu.dob ? ` (${dobToWords(stu.dob)})` : '';
+
         const card = document.createElement('div');
         card.className = 'report-card-container';
         
@@ -811,37 +864,48 @@
               Result of ${targetExam} (${targetSession})
             </div>
 
-            <!-- Student Profile Box (Exact 4-Row Flow) -->
+            <!-- Student Profile Box (Complete 4-Row Flow with DOB in Words) -->
             <div style="border: 1.5px solid #0f172a; padding: 10px 14px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background-color: #f8fafc;">
-              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 11.5px;">
+                
+                <!-- 1. Student Name (Full Width) -->
                 <div>
                   <span style="color: #475569; font-weight: 600;">Student's Name:</span> 
                   <b style="font-size: 13.5px; color: #0f172a; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 4px;">${stu.studentName}</b>
                 </div>
+
+                <!-- 2. Father's Name (Full Width) -->
                 <div>
                   <span style="color: #475569; font-weight: 600;">Father's Name:</span> 
                   <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.fatherName}</b>
                 </div>
+
+                <!-- 3. Mother's Name (Full Width) -->
                 <div>
                   <span style="color: #475569; font-weight: 600;">Mother's Name:</span> 
                   <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.motherName || '—'}</b>
                 </div>
-                <div style="display: flex; gap: 30px; align-items: center; margin-top: 1px;">
+
+                <!-- 4. Student ID, Class & Sec, and DOB with Words -->
+                <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 1px;">
                   <div>
                     <span style="color: #475569; font-weight: 600;">Student ID:</span> 
-                    <b style="font-family: monospace; font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.studentId}</b>
+                    <b style="font-family: monospace; font-size: 12px; color: #0f172a; margin-left: 4px;">${stu.studentId}</b>
                   </div>
                   <div>
                     <span style="color: #475569; font-weight: 600;">Class & Sec:</span> 
-                    <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.className} - ${stu.section}</b>
+                    <b style="font-size: 12px; color: #0f172a; margin-left: 4px;">${stu.className} - ${stu.section}</b>
                   </div>
                   <div>
                     <span style="color: #475569; font-weight: 600;">Date of Birth:</span> 
-                    <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.dob || '—'}</b>
+                    <b style="font-size: 11.5px; color: #0f172a; margin-left: 4px;">${stu.dob || '—'}<span style="font-weight: 600; color: #334155; font-size: 10.5px;">${dobInWordsText}</span></b>
                   </div>
                 </div>
+
               </div>
-              <div style="width: 35mm; height: 40mm; border: 1.5px solid #0f172a; background: #fff; padding: 1px; border-radius: 3px; flex-shrink: 0; margin-left: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+
+              <!-- 35mm x 40mm Large Photo -->
+              <div style="width: 35mm; height: 40mm; border: 1.5px solid #0f172a; background: #fff; padding: 1px; border-radius: 3px; flex-shrink: 0; margin-left: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; border-radius: 2px;" alt="Photo">
               </div>
             </div>
@@ -879,6 +943,8 @@
 
               <!-- Co-Scholastic & Attendance Area (Right) -->
               <div style="display: flex; flex-direction: column; gap: 10px;">
+                
+                <!-- Co-Scholastic Table -->
                 <div style="border: 1.5px solid #0f172a; border-radius: 3px; overflow: hidden;">
                   <div style="background-color: #1e1b4b; color: #ffffff; font-weight: bold; text-align: center; padding: 5px 0; font-size: 11px; text-transform: uppercase;">
                     Co-Scholastic Areas
@@ -900,6 +966,7 @@
                   </table>
                 </div>
 
+                <!-- Attendance Box -->
                 <div style="border: 1.5px solid #0f172a; border-radius: 3px; overflow: hidden;">
                   <div style="background-color: #1e1b4b; color: #ffffff; font-weight: bold; text-align: center; padding: 5px 0; font-size: 11px; text-transform: uppercase;">
                     Attendance Record
@@ -910,6 +977,7 @@
                     <div style="display: flex; justify-content: space-between; border-top: 1px solid #cbd5e1; padding-top: 4px;"><span>Attendance:</span><span style="font-weight: bold; color: #1e1b4b;">${attendancePercent}%</span></div>
                   </div>
                 </div>
+
               </div>
 
             </div>
