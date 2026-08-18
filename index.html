@@ -14,7 +14,7 @@
   
   <style>
     /* -------------------------------------------------------------
-       1. FREEZE HEADER WITH SOLID OPAQUE BACKGROUND (PORTAL DASHBOARD)
+       1. PORTAL FREEZE HEADER & RESPONSIVE STYLING
     ------------------------------------------------------------- */
     .table-scroll-container {
       max-height: calc(100vh - 120px);
@@ -56,7 +56,7 @@
     }
 
     /* -------------------------------------------------------------
-       2. EXACT UI & PRINT 1:1 IDENTICAL LAYOUT
+       2. EXACT A4 FULL-PAGE BALANCED PRINT STYLING
     ------------------------------------------------------------- */
     @page {
       size: A4 portrait;
@@ -577,7 +577,7 @@
     }
 
     // ============================================================
-    // REPORT CARD BUILDER (1:1 Exact Same Layout)
+    // REPORT CARD BUILDER (1:1 Exact Same-to-Same Full Page)
     // ============================================================
     function handlePrintResult() {
       const selectedIds = Array.from(document.querySelectorAll('.student-check:checked')).map(cb => cb.value);
@@ -630,8 +630,8 @@
             curMaxSum += 100;
 
             activeSubjectRows += `
-              <tr style="height: 30px; text-align: center;">
-                <td style="padding: 4px 14px; text-align: left; font-weight: bold; font-size: 11.5px; width: 48%; color: #000;">${getSubjectFullName(subCode)}</td>
+              <tr style="height: 32px; text-align: center;">
+                <td style="padding: 6px 14px; text-align: left; font-weight: bold; font-size: 11.5px; width: 48%; color: #000;">${getSubjectFullName(subCode)}</td>
                 <td style="width: 17%; font-size: 11.5px;">100</td>
                 <td style="width: 17%; font-weight: bold; font-size: 12px;">${scaledMark}</td>
                 <td style="width: 18%; font-weight: bold; font-size: 11.5px;">${subGrade}</td>
@@ -798,16 +798,16 @@
                   <table class="report-table-box" style="font-size: 11.5px;">
                     <thead style="background-color: #e0e7ff; font-weight: bold; height: 28px;">
                       <tr style="text-align: center;">
-                        <th style="padding-left: 12px; text-align: left;">Areas</th>
-                        <th style="padding-right: 12px; text-align: right; width: 45%;">Grade</th>
+                        <th style="padding: 0 12px; text-align: left;">Areas</th>
+                        <th style="padding: 0 12px; text-align: center; width: 45%;">Grade</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr style="height: 28px;"><td style="padding-left: 12px;">Discipline</td><td style="padding-right: 12px; text-align: right; font-weight: bold;">Well-Behaved</td></tr>
-                      <tr style="height: 28px;"><td style="padding-left: 12px;">Cleanliness</td><td style="padding-right: 12px; text-align: right; font-weight: bold;">Maintained</td></tr>
-                      <tr style="height: 28px;"><td style="padding-left: 12px;">Speaking Skill</td><td style="padding-right: 12px; text-align: right; font-weight: bold;">Articulate</td></tr>
-                      <tr style="height: 28px;"><td style="padding-left: 12px;">Activity Participation</td><td style="padding-right: 12px; text-align: right; font-weight: bold;">Enthusiastic</td></tr>
-                      <tr style="height: 28px;"><td style="padding-left: 12px;">Homework Regularity</td><td style="padding-right: 12px; text-align: right; font-weight: bold;">Consistent</td></tr>
+                      <tr style="height: 30px;"><td style="padding: 0 12px; text-align: left;">Discipline</td><td style="padding: 0 12px; text-align: center; font-weight: bold;">Well-Behaved</td></tr>
+                      <tr style="height: 30px;"><td style="padding: 0 12px; text-align: left;">Cleanliness</td><td style="padding: 0 12px; text-align: center; font-weight: bold;">Maintained</td></tr>
+                      <tr style="height: 30px;"><td style="padding: 0 12px; text-align: left;">Speaking Skill</td><td style="padding: 0 12px; text-align: center; font-weight: bold;">Articulate</td></tr>
+                      <tr style="height: 30px;"><td style="padding: 0 12px; text-align: left;">Activity Participation</td><td style="padding: 0 12px; text-align: center; font-weight: bold;">Enthusiastic</td></tr>
+                      <tr style="height: 30px;"><td style="padding: 0 12px; text-align: left;">Homework Regularity</td><td style="padding: 0 12px; text-align: center; font-weight: bold;">Consistent</td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -846,7 +846,7 @@
             </div>
           </div>
 
-          <!-- Bottom Remarks & Signatures Footer -->
+          <!-- Bottom Remarks & Signatures Footer (Zero Bottom Gap) -->
           <div style="border-top: 1.5px solid #000; padding-top: 8px; width: 100%;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
               <div style="font-size: 11.5px;"><span style="color: #475569;">Teacher's Remark:</span> <i><b>Shows consistent progress, good conduct and focus.</b></i></div>
@@ -854,22 +854,22 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 8px; text-align: center; font-weight: bold; font-size: 11.5px; color: #0f172a;">
-              <div style="display: flex; flex-direction: column; items: center;">
-                <div id="qr_${studentId}" style="margin-bottom: 3px; padding: 2px; border: 1px solid #cbd5e1; border-radius: 3px; background: #ffffff;"></div>
-                <span style="font-size: 9px; color: #64748b; font-weight: normal;">Scan to Verify</span>
-                <span style="font-size: 9px; color: #64748b; font-weight: normal;">Date: ${new Date().toLocaleDateString('en-GB')}</span>
+              <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <div id="qr_${studentId}" style="margin-bottom: 4px; padding: 3px; border: 1.5px solid #0f172a; border-radius: 4px; background: #ffffff;"></div>
+                <span style="font-size: 9px; color: #475569; font-weight: normal;">Scan to Verify</span>
+                <span style="font-size: 9px; color: #475569; font-weight: normal;">Date: ${new Date().toLocaleDateString('en-GB')}</span>
               </div>
 
               <div style="display: flex; flex-direction: column; items: center;">
-                <div style="height: 38px;"></div>
+                <div style="height: 42px;"></div>
                 <div style="border-top: 1.5px solid #000; width: 140px; padding-top: 3px;">Class Teacher</div>
               </div>
 
               <div style="display: flex; flex-direction: column; items: center;">
-                <div style="height: 38px;"></div>
+                <div style="height: 42px;"></div>
                 <div style="border-top: 1.5px solid #000; width: 180px; padding-top: 3px;">
                   <div>Principal's Stamp & Signature</div>
-                  <div style="font-size: 9px; color: #64748b; font-weight: normal; margin-top: 1px;">Ambedkar Public School</div>
+                  <div style="font-size: 9px; color: #475569; font-weight: normal; margin-top: 1px;">Ambedkar Public School</div>
                 </div>
               </div>
             </div>
@@ -878,10 +878,21 @@
 
         container.appendChild(card);
 
+        // QR Code Generator with rich student details & verification data
+        const qrPayload = `AMBEDKAR PUBLIC SCHOOL (MADHOPUR)
+Student: ${stu.studentName}
+ID: ${stu.studentId}
+Class: ${stu.className} - ${stu.section}
+Session: ${targetSession}
+Exam: ${targetExam}
+Marks: ${grandObtained}/${grandMax} (${finalPercentage}%)
+Grade: ${overallGrade}
+Status: ${isAnnual ? 'PROMOTED' : 'PASS'}`;
+
         new QRCode(document.getElementById(`qr_${studentId}`), {
-          text: `APS MADHOPUR | Student: ${stu.studentName} | ID: ${stu.studentId} | Class: ${stu.className} | Session: ${targetSession} | Status: ${isAnnual ? 'PROMOTED' : 'PASS'}`,
-          width: 44,
-          height: 44,
+          text: qrPayload,
+          width: 65,
+          height: 65,
           colorDark: "#000000",
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.M
