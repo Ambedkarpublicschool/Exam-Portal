@@ -577,7 +577,7 @@
     }
 
     // ============================================================
-    // REPORT CARD BUILDER (Full Row Student Name & Expanded Layout)
+    // REPORT CARD BUILDER (4-Row Formatted Profile Layout)
     // ============================================================
     function handlePrintResult() {
       const selectedIds = Array.from(document.querySelectorAll('.student-check:checked')).map(cb => cb.value);
@@ -741,33 +741,48 @@
               Result of ${targetExam} (${targetSession})
             </div>
 
-            <!-- Expanded Student Profile Box (Full Row 1 Name + 40mm x 35mm Photo) -->
-            <div style="border: 1.5px solid #0f172a; padding: 12px 16px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background-color: #f8fafc; min-height: 48mm;">
-              <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+            <!-- Student Profile Box (Exact 4-Row Flow as Handwritten Note) -->
+            <div style="border: 1.5px solid #0f172a; padding: 10px 14px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background-color: #f8fafc;">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
                 
-                <!-- Row 1: Full-Width Prominent Student Name -->
-                <div style="font-size: 13.5px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px;">
+                <!-- 1. Student Name (Full Width) -->
+                <div>
                   <span style="color: #475569; font-weight: 600;">Student's Name:</span> 
-                  <b style="font-size: 14.5px; color: #0f172a; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 6px;">${stu.studentName}</b>
+                  <b style="font-size: 13.5px; color: #0f172a; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 4px;">${stu.studentName}</b>
                 </div>
 
-                <!-- Row 2: ID, Class & Sec, DOB -->
-                <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; font-size: 12px; align-items: center;">
-                  <div><span style="color: #475569;">Student ID:</span> <b style="font-family: monospace; font-size: 12.5px;">${stu.studentId}</b></div>
-                  <div><span style="color: #475569;">Class & Sec:</span> <b>${stu.className} - ${stu.section}</b></div>
-                  <div><span style="color: #475569;">Date of Birth:</span> <b>${stu.dob || '—'}</b></div>
+                <!-- 2. Father's Name (Full Width) -->
+                <div>
+                  <span style="color: #475569; font-weight: 600;">Father's Name:</span> 
+                  <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.fatherName}</b>
                 </div>
 
-                <!-- Row 3: Parents Information -->
-                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; font-size: 12px; align-items: center;">
-                  <div><span style="color: #475569;">Father's Name:</span> <b>${stu.fatherName}</b></div>
-                  <div><span style="color: #475569;">Mother's Name:</span> <b>${stu.motherName || '—'}</b></div>
+                <!-- 3. Mother's Name (Full Width) -->
+                <div>
+                  <span style="color: #475569; font-weight: 600;">Mother's Name:</span> 
+                  <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.motherName || '—'}</b>
+                </div>
+
+                <!-- 4. Student ID & Class & Sec -->
+                <div style="display: flex; gap: 30px; align-items: center; margin-top: 1px;">
+                  <div>
+                    <span style="color: #475569; font-weight: 600;">Student ID:</span> 
+                    <b style="font-family: monospace; font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.studentId}</b>
+                  </div>
+                  <div>
+                    <span style="color: #475569; font-weight: 600;">Class & Sec:</span> 
+                    <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.className} - ${stu.section}</b>
+                  </div>
+                  <div>
+                    <span style="color: #475569; font-weight: 600;">Date of Birth:</span> 
+                    <b style="font-size: 12.5px; color: #0f172a; margin-left: 4px;">${stu.dob || '—'}</b>
+                  </div>
                 </div>
 
               </div>
 
-              <!-- Large 35mm x 40mm Photo -->
-              <div style="width: 35mm; height: 40mm; border: 1.5px solid #0f172a; background: #fff; padding: 1px; border-radius: 3px; flex-shrink: 0; margin-left: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+              <!-- 35mm x 40mm Large Photo -->
+              <div style="width: 35mm; height: 40mm; border: 1.5px solid #0f172a; background: #fff; padding: 1px; border-radius: 3px; flex-shrink: 0; margin-left: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; border-radius: 2px;" alt="Photo">
               </div>
             </div>
@@ -894,7 +909,7 @@
 
         container.appendChild(card);
 
-        // Clean & Fast QR Code Payload containing only Name, ID, and Class
+        // QR Code containing only Name, ID, and Class
         const qrPayload = `Name: ${stu.studentName}
 ID: ${stu.studentId}
 Class: ${stu.className} - ${stu.section}`;
