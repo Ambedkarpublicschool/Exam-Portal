@@ -95,20 +95,20 @@
     }
 
     /* -------------------------------------------------------------
-       4. REPORT CARD & NATURAL A4 PRINT STYLING
+       4. REPORT CARD & EXACT A4 100% FIT PRINT STYLING
     ------------------------------------------------------------- */
     @page {
       size: A4 portrait;
-      margin: 8mm;
+      margin: 0;
     }
     
     .report-card {
-      width: 194mm;
-      min-height: 275mm;
+      width: 198mm;
+      min-height: 284mm;
       margin: 0 auto 10mm auto;
       background-color: #ffffff;
       border: 2px solid #1e293b;
-      padding: 6mm 8mm;
+      padding: 7mm 8mm;
       box-sizing: border-box;
       position: relative;
     }
@@ -119,8 +119,8 @@
 
     @media print {
       html, body {
-        width: 100% !important;
-        height: 100% !important;
+        width: 210mm !important;
+        height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -140,12 +140,12 @@
         margin: 0 !important;
       }
       .report-card {
-        width: 100% !important;
-        max-width: 194mm !important;
-        height: 275mm !important;
-        min-height: 275mm !important;
-        margin: 0 auto !important;
-        padding: 6mm 8mm !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        min-height: 297mm !important;
+        max-height: 297mm !important;
+        margin: 0 !important;
+        padding: 8mm 10mm !important;
         box-sizing: border-box !important;
         border: 2px solid #000000 !important;
         page-break-after: always !important;
@@ -623,7 +623,7 @@
     }
 
     // ============================================================
-    // REPORT CARD BUILDER & RENDERER (Clean Dynamic A4 Layout)
+    // REPORT CARD BUILDER & RENDERER (Full A4 Balanced Layout)
     // ============================================================
     function handlePrintResult() {
       const selectedIds = Array.from(document.querySelectorAll('.student-check:checked')).map(cb => cb.value);
@@ -641,7 +641,7 @@
 
       const currentExamObj = state.exams.find(e => e.examName === targetExam) || { maxMarkPerSubject: 100, subjects: [] };
 
-      // Working Days Setup
+      // Determine Working Days
       let workingDays = 210;
       const isAnnual = targetExam.toLowerCase().includes("annual");
       const isHalfYearly = targetExam.toLowerCase().includes("half");
@@ -683,10 +683,10 @@
 
             activeSubjectRows += `
               <tr class="border-b border-gray-300 text-center text-[11px]">
-                <td class="py-1 text-left font-semibold pl-2">${getSubjectFullName(subCode)}</td>
-                <td class="py-1">100</td>
-                <td class="py-1 font-bold text-gray-900">${scaledMark}</td>
-                <td class="py-1 font-semibold text-gray-700">${subGrade}</td>
+                <td class="py-1.5 text-left font-semibold px-2 whitespace-normal leading-snug">${getSubjectFullName(subCode)}</td>
+                <td class="py-1.5 px-2 w-14">100</td>
+                <td class="py-1.5 px-2 w-16 font-bold text-gray-900">${scaledMark}</td>
+                <td class="py-1.5 px-2 w-14 font-semibold text-gray-700">${subGrade}</td>
               </tr>
             `;
           }
@@ -714,57 +714,23 @@
 
         const qSummary = calcTermSummary("Quarterly Examination");
         const hySummary = calcTermSummary("Half Yearly Examination");
+        const anSummary = calcTermSummary("Annual Examination");
 
         // Grand Total Calculation
         let grandObtained = curObtainedSum;
         let grandMax = curMaxSum;
 
-        let consolidatedBoxHtml = '';
-
         if (isHalfYearly) {
           grandObtained = qSummary.obt + curObtainedSum;
           grandMax = qSummary.max + curMaxSum;
-          
-          consolidatedBoxHtml = `
-            <div class="border border-indigo-900 rounded my-2 bg-indigo-50/40 p-2 text-[11px]">
-              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-0.5 mb-1 text-[10px] uppercase tracking-wider">CONSOLIDATED PROGRESS SUMMARY</div>
-              <div class="grid grid-cols-2 gap-x-4 items-center">
-                <div class="space-y-1">
-                  <div class="flex justify-between border-b border-gray-200 pb-0.5"><span>1. Quarterly Examination :</span><span class="font-bold">${qSummary.obt} / ${qSummary.max}</span></div>
-                  <div class="flex justify-between"><span>2. Half Yearly Examination :</span><span class="font-bold">${curObtainedSum} / ${curMaxSum}</span></div>
-                </div>
-                <div class="border-l border-indigo-200 pl-3 flex flex-col justify-center space-y-0.5">
-                  <div class="flex justify-between items-center"><span class="text-gray-600">Grand Total:</span><span class="font-bold text-sm text-indigo-950">${grandObtained} / ${grandMax}</span></div>
-                  <div class="flex justify-between items-center"><span class="text-gray-600">Percentage:</span><span class="font-bold text-sm text-indigo-950">${grandMax > 0 ? ((grandObtained / grandMax) * 100).toFixed(2) : "0.00"}%</span></div>
-                  <div class="flex justify-between items-center"><span class="text-gray-600">Overall Grade:</span><span class="font-bold text-sm text-indigo-950">${calculateGrade(grandMax > 0 ? (grandObtained / grandMax) * 100 : 0)}</span></div>
-                </div>
-              </div>
-            </div>
-          `;
         } else if (isAnnual) {
           grandObtained = qSummary.obt + hySummary.obt + curObtainedSum;
           grandMax = qSummary.max + hySummary.max + curMaxSum;
-
-          consolidatedBoxHtml = `
-            <div class="border border-indigo-900 rounded my-2 bg-indigo-50/40 p-2 text-[11px]">
-              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-0.5 mb-1 text-[10px] uppercase tracking-wider">CONSOLIDATED PROGRESS SUMMARY</div>
-              <div class="grid grid-cols-2 gap-x-4 items-center">
-                <div class="space-y-1">
-                  <div class="flex justify-between border-b border-gray-200 pb-0.5"><span>1. Quarterly Examination :</span><span class="font-bold">${qSummary.obt} / ${qSummary.max}</span></div>
-                  <div class="flex justify-between border-b border-gray-200 pb-0.5"><span>2. Half Yearly Examination :</span><span class="font-bold">${hySummary.obt} / ${hySummary.max}</span></div>
-                  <div class="flex justify-between"><span>3. Annual Examination :</span><span class="font-bold">${curObtainedSum} / ${curMaxSum}</span></div>
-                </div>
-                <div class="border-l border-indigo-200 pl-3 flex flex-col justify-center space-y-0.5">
-                  <div class="flex justify-between items-center"><span class="text-gray-600">Grand Total:</span><span class="font-bold text-sm text-indigo-950">${grandObtained} / ${grandMax}</span></div>
-                  <div class="flex justify-between items-center"><span class="text-gray-600">Percentage:</span><span class="font-bold text-sm text-indigo-950">${grandMax > 0 ? ((grandObtained / grandMax) * 100).toFixed(2) : "0.00"}%</span></div>
-                  <div class="flex justify-between items-center"><span class="text-gray-600">Overall Grade:</span><span class="font-bold text-sm text-indigo-950">${calculateGrade(grandMax > 0 ? (grandObtained / grandMax) * 100 : 0)}</span></div>
-                </div>
-              </div>
-            </div>
-          `;
         }
 
         const finalPercentage = grandMax > 0 ? ((grandObtained / grandMax) * 100).toFixed(2) : "0.00";
+        const overallGrade = calculateGrade(parseFloat(finalPercentage));
+
         const presentDays = Math.round(workingDays * (0.75 + (parseFloat(finalPercentage) / 100) * 0.20));
         const attendancePercent = ((presentDays / workingDays) * 100).toFixed(2);
 
@@ -772,18 +738,36 @@
           ? `<div><span class="font-semibold text-gray-600">Promotion Status:</span> <span class="font-bold text-indigo-950">Promoted to ${getPromotedClass(stu.className)}</span></div>`
           : `<div><span class="font-semibold text-gray-600">Status:</span> <span class="font-bold text-emerald-800">Progressing Satisfactorily</span></div>`;
 
+        // 3-Exam Rows in Consolidated Summary
+        let row1Text = '1. Quarterly Examination :';
+        let row1Val = qSummary.hasData ? `${qSummary.obt} / ${qSummary.max}` : (isQuarterly ? `${curObtainedSum} / ${curMaxSum}` : '');
+
+        let row2Text = '';
+        let row2Val = '';
+        if (isHalfYearly || isAnnual || hySummary.hasData) {
+          row2Text = '2. Half Yearly Examination :';
+          row2Val = hySummary.hasData ? `${hySummary.obt} / ${hySummary.max}` : (isHalfYearly ? `${curObtainedSum} / ${curMaxSum}` : '');
+        }
+
+        let row3Text = '';
+        let row3Val = '';
+        if (isAnnual || anSummary.hasData) {
+          row3Text = '3. Annual Examination :';
+          row3Val = anSummary.hasData ? `${anSummary.obt} / ${anSummary.max}` : (isAnnual ? `${curObtainedSum} / ${curMaxSum}` : '');
+        }
+
         const card = document.createElement('div');
         card.className = 'report-card flex flex-col justify-between';
         
         card.innerHTML = `
           <!-- Header Area -->
           <div>
-            <div class="flex justify-between text-[10px] font-semibold text-gray-700 border-b border-gray-400 pb-1 mb-1">
+            <div class="flex justify-between text-[10px] font-semibold text-gray-700 border-b border-gray-400 pb-1 mb-2">
               <span>Recognition Number: GOP0958326469</span>
               <span>U-DISE Code: 09584109512</span>
             </div>
 
-            <div class="flex items-center justify-between gap-3 my-1">
+            <div class="flex items-center justify-between gap-3 my-2">
               <img src="${LOGO_URL}" class="w-16 h-16 object-contain" alt="Logo">
               <div class="text-center flex-1">
                 <div class="text-[10px] font-bold text-gray-700 tracking-wide">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
@@ -799,8 +783,8 @@
             </div>
 
             <!-- Student Profile -->
-            <div class="border border-gray-400 p-2.5 rounded flex justify-between items-center my-2 text-[11px] bg-slate-50/50">
-              <div class="grid grid-cols-2 gap-x-4 gap-y-1 flex-1">
+            <div class="border border-gray-400 p-2.5 rounded flex justify-between items-center my-2.5 text-[11px] bg-slate-50/50">
+              <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 flex-1">
                 <div><span class="text-gray-500 font-medium">Student's Name:</span> <span class="font-bold text-gray-900 uppercase">${stu.studentName}</span></div>
                 <div><span class="text-gray-500 font-medium">Class & Sec:</span> <span class="font-bold text-gray-900">${stu.className} - ${stu.section}</span></div>
                 <div><span class="text-gray-500 font-medium">Student ID:</span> <span class="font-bold font-mono text-gray-900">${stu.studentId}</span></div>
@@ -814,7 +798,7 @@
             </div>
 
             <!-- Performance Grids -->
-            <div class="grid grid-cols-12 gap-3 my-2 items-start">
+            <div class="grid grid-cols-12 gap-3 my-2.5 items-start">
               
               <!-- Scholastic Marks -->
               <div class="col-span-7 border border-gray-400 rounded overflow-hidden">
@@ -824,10 +808,10 @@
                 <table class="w-full text-[11px]">
                   <thead class="bg-indigo-50 font-bold border-b border-gray-400">
                     <tr class="text-center">
-                      <th class="py-1 text-left pl-2">Subject</th>
-                      <th class="py-1">Max</th>
-                      <th class="py-1">Gained</th>
-                      <th class="py-1">Grade</th>
+                      <th class="py-1 px-2 text-left">Subject</th>
+                      <th class="py-1 px-2 w-14">Max</th>
+                      <th class="py-1 px-2 w-16">Gained</th>
+                      <th class="py-1 px-2 w-14">Grade</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -835,16 +819,16 @@
                   </tbody>
                   <tfoot class="bg-indigo-50 font-bold border-t border-gray-400 text-center">
                     <tr>
-                      <td class="py-1 text-left pl-2">Total (${targetExam})</td>
-                      <td class="py-1">${curMaxSum}</td>
-                      <td class="py-1 text-indigo-900 font-extrabold">${curObtainedSum}</td>
-                      <td class="py-1 font-bold">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
+                      <td class="py-1.5 px-2 text-left">Total (${targetExam})</td>
+                      <td class="py-1.5 px-2">${curMaxSum}</td>
+                      <td class="py-1.5 px-2 text-indigo-900 font-extrabold">${curObtainedSum}</td>
+                      <td class="py-1.5 px-2 font-bold">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
 
-              <!-- Co-Scholastic & Attendance -->
+              <!-- Co-Scholastic & Attendance & Overall -->
               <div class="col-span-5 flex flex-col gap-2">
                 
                 <div class="border border-gray-400 rounded overflow-hidden">
@@ -854,16 +838,16 @@
                   <table class="w-full text-[11px]">
                     <thead class="bg-indigo-50 font-bold border-b border-gray-400">
                       <tr class="text-center">
-                        <th class="py-1 text-left pl-2">Areas</th>
-                        <th class="py-1 text-right pr-2">Grade</th>
+                        <th class="py-1 px-2 text-left">Areas</th>
+                        <th class="py-1 px-2 text-right">Grade</th>
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                      <tr><td class="py-1 pl-2">Discipline</td><td class="py-1 text-right pr-2 font-medium">Well-Behaved</td></tr>
-                      <tr><td class="py-1 pl-2">Cleanliness</td><td class="py-1 text-right pr-2 font-medium">Maintained</td></tr>
-                      <tr><td class="py-1 pl-2">Speaking Skill</td><td class="py-1 text-right pr-2 font-medium">Articulate</td></tr>
-                      <tr><td class="py-1 pl-2">Activity Participation</td><td class="py-1 text-right pr-2 font-medium">Enthusiastic</td></tr>
-                      <tr><td class="py-1 pl-2">Homework Regularity</td><td class="py-1 text-right pr-2 font-medium">Consistent</td></tr>
+                      <tr><td class="py-1 px-2">Discipline</td><td class="py-1 px-2 text-right font-medium">Well-Behaved</td></tr>
+                      <tr><td class="py-1 px-2">Cleanliness</td><td class="py-1 px-2 text-right font-medium">Maintained</td></tr>
+                      <tr><td class="py-1 px-2">Speaking Skill</td><td class="py-1 px-2 text-right font-medium">Articulate</td></tr>
+                      <tr><td class="py-1 px-2">Activity Participation</td><td class="py-1 px-2 text-right font-medium">Enthusiastic</td></tr>
+                      <tr><td class="py-1 px-2">Homework Regularity</td><td class="py-1 px-2 text-right font-medium">Consistent</td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -883,19 +867,41 @@
 
             </div>
 
-            <!-- Dynamic Consolidated Summary Box (Appears only on Half Yearly & Annual) -->
-            ${consolidatedBoxHtml}
-
+            <!-- Consolidated Summary Box with 3-Exam Structure -->
+            <div class="border border-indigo-900 rounded my-2.5 bg-indigo-50/40 p-2.5 text-[11px]">
+              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-1 mb-1.5 text-[10px] uppercase tracking-wider">CONSOLIDATED PROGRESS SUMMARY</div>
+              <div class="grid grid-cols-2 gap-x-4 items-center">
+                <div class="space-y-1.5">
+                  <div class="flex justify-between border-b border-gray-200 pb-0.5">
+                    <span>${row1Text}</span>
+                    <span class="font-bold">${row1Val}</span>
+                  </div>
+                  <div class="flex justify-between border-b border-gray-200 pb-0.5">
+                    <span>${row2Text}</span>
+                    <span class="font-bold">${row2Val}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>${row3Text}</span>
+                    <span class="font-bold">${row3Val}</span>
+                  </div>
+                </div>
+                <div class="border-l border-indigo-200 pl-3 flex flex-col justify-center space-y-1.5">
+                  <div class="flex justify-between items-center"><span class="text-gray-600">Grand Total:</span><span class="font-bold text-sm text-indigo-950">${grandObtained} / ${grandMax}</span></div>
+                  <div class="flex justify-between items-center"><span class="text-gray-600">Percentage:</span><span class="font-bold text-sm text-indigo-950">${finalPercentage}%</span></div>
+                  <div class="flex justify-between items-center"><span class="text-gray-600">Overall Grade:</span><span class="font-bold text-sm text-indigo-950">${overallGrade}</span></div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Bottom Remarks, QR Code & Signatures -->
-          <div class="border-t border-gray-400 pt-2 mt-auto">
-            <div class="flex justify-between items-center text-[10px] mb-3">
+          <div class="border-t border-gray-400 pt-3 mt-auto">
+            <div class="flex justify-between items-center text-[10px] mb-4">
               <div><span class="font-semibold text-gray-600">Teacher's Remark:</span> <span class="font-medium italic">Shows consistent progress, good conduct and focus.</span></div>
               ${promotionHtml}
             </div>
 
-            <div class="flex justify-between items-end pt-4 pb-1 text-center text-[10px] font-bold text-gray-800">
+            <div class="flex justify-between items-end pt-5 pb-1 text-center text-[10px] font-bold text-gray-800">
               <div class="flex flex-col items-center">
                 <div id="qr_${studentId}" class="mb-1 p-0.5 border border-gray-300 rounded bg-white"></div>
                 <span class="text-[8px] text-gray-500 font-normal">Scan to Verify</span>
@@ -904,12 +910,12 @@
 
               <div class="flex flex-col items-center">
                 <div class="h-10"></div>
-                <div class="border-t border-gray-800 w-32 pt-1">Class Teacher</div>
+                <div class="border-t border-gray-800 w-36 pt-1">Class Teacher</div>
               </div>
 
               <div class="flex flex-col items-center">
                 <div class="h-10"></div>
-                <div class="border-t border-gray-800 w-44 pt-1">
+                <div class="border-t border-gray-800 w-48 pt-1">
                   <div>Principal's Stamp & Signature</div>
                   <div class="text-[8px] text-gray-500 font-normal">Ambedkar Public School</div>
                 </div>
