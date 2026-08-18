@@ -14,7 +14,7 @@
   
   <style>
     /* -------------------------------------------------------------
-       1. PORTAL FREEZE HEADER & RESPONSIVE STYLING
+       1. FREEZE HEADER WITH SOLID OPAQUE BACKGROUND (PORTAL DASHBOARD)
     ------------------------------------------------------------- */
     .table-scroll-container {
       max-height: calc(100vh - 120px);
@@ -56,7 +56,7 @@
     }
 
     /* -------------------------------------------------------------
-       2. EXACT A4 FULL-PAGE BALANCED PRINT STYLING
+       2. EXACT UI & PRINT 1:1 IDENTICAL LAYOUT
     ------------------------------------------------------------- */
     @page {
       size: A4 portrait;
@@ -695,7 +695,7 @@
               <span style="font-weight: bold;">1. Quarterly Examination :</span>
               <span style="font-weight: bold;">${qSummary.obt} / ${qSummary.max}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #cbd5e1; font-size: 11px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 0; border-bottom: 1px solid #cbd5e1; font-size: 11px;">
               <span style="font-weight: bold;">2. Half Yearly Examination :</span>
               <span style="font-weight: bold;">${hySummary.obt} / ${hySummary.max}</span>
             </div>
@@ -846,7 +846,7 @@
             </div>
           </div>
 
-          <!-- Bottom Remarks & Signatures Footer (Zero Bottom Gap) -->
+          <!-- Bottom Remarks & Signatures Footer -->
           <div style="border-top: 1.5px solid #000; padding-top: 8px; width: 100%;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
               <div style="font-size: 11.5px;"><span style="color: #475569;">Teacher's Remark:</span> <i><b>Shows consistent progress, good conduct and focus.</b></i></div>
@@ -855,7 +855,7 @@
 
             <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 8px; text-align: center; font-weight: bold; font-size: 11.5px; color: #0f172a;">
               <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                <div id="qr_${studentId}" style="margin-bottom: 4px; padding: 3px; border: 1.5px solid #0f172a; border-radius: 4px; background: #ffffff;"></div>
+                <div id="qr_${studentId}" style="margin-bottom: 4px; padding: 2px; border: 1.5px solid #0f172a; border-radius: 4px; background: #ffffff; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;"></div>
                 <span style="font-size: 9px; color: #475569; font-weight: normal;">Scan to Verify</span>
                 <span style="font-size: 9px; color: #475569; font-weight: normal;">Date: ${new Date().toLocaleDateString('en-GB')}</span>
               </div>
@@ -878,21 +878,15 @@
 
         container.appendChild(card);
 
-        // QR Code Generator with rich student details & verification data
-        const qrPayload = `AMBEDKAR PUBLIC SCHOOL (MADHOPUR)
-Student: ${stu.studentName}
+        // QR Code Payload strictly containing Name, ID, and Class
+        const qrPayload = `Name: ${stu.studentName}
 ID: ${stu.studentId}
-Class: ${stu.className} - ${stu.section}
-Session: ${targetSession}
-Exam: ${targetExam}
-Marks: ${grandObtained}/${grandMax} (${finalPercentage}%)
-Grade: ${overallGrade}
-Status: ${isAnnual ? 'PROMOTED' : 'PASS'}`;
+Class: ${stu.className} - ${stu.section}`;
 
         new QRCode(document.getElementById(`qr_${studentId}`), {
           text: qrPayload,
-          width: 65,
-          height: 65,
+          width: 66,
+          height: 66,
           colorDark: "#000000",
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.M
