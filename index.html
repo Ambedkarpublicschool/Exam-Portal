@@ -101,16 +101,18 @@
       size: A4 portrait;
       margin: 0;
     }
+    
     .report-card {
-      width: 194mm;
-      max-height: 275mm;
-      margin: 0 auto 8mm auto;
+      width: 196mm;
+      min-height: 282mm;
+      margin: 0 auto 10mm auto;
       background-color: #ffffff;
       border: 2px solid #1e293b;
-      padding: 5mm 6mm;
+      padding: 7mm 8mm;
       box-sizing: border-box;
       position: relative;
     }
+    
     .card-banner {
       background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
     }
@@ -138,11 +140,12 @@
         margin: 0 !important;
       }
       .report-card {
-        width: 100% !important;
-        max-width: 210mm !important;
+        width: 210mm !important;
+        height: 297mm !important;
         min-height: 297mm !important;
-        margin: 0 auto !important;
-        padding: 8mm 10mm !important;
+        max-height: 297mm !important;
+        margin: 0 !important;
+        padding: 10mm 12mm !important;
         box-sizing: border-box !important;
         border: 2px solid #000000 !important;
         page-break-after: always !important;
@@ -321,7 +324,7 @@
     };
 
     function formatDrivePhoto(url) {
-      if (!url) return 'https://placehold.co/80x100?text=Passport+Photo';
+      if (!url) return 'https://placehold.co/100x120?text=Passport+Photo';
       let fileId = '';
       const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       const dMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -492,13 +495,11 @@
         const studentSavedMarks = state.savedMarks[compositeKey] || {};
 
         let rowHtml = `
-          <!-- Checkbox & SR -->
           <td class="p-1 text-center border-r border-gray-200">
             <input type="checkbox" class="student-check cursor-pointer scale-90 sm:scale-100" value="${stu.studentId}" onchange="updateSelectedCount()">
           </td>
           <td class="p-1 text-center text-gray-500 font-mono text-[10px] sm:text-xs border-r border-gray-200">${idx + 1}</td>
           
-          <!-- PC Specific Columns -->
           <td class="pc-only p-2 font-mono font-medium border-r border-gray-200">${stu.studentId}</td>
           <td class="pc-only p-1.5 text-center border-r border-gray-200">
             <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full object-cover mx-auto border" onerror="this.onerror=null;this.src='https://placehold.co/60x60?text=NA';">
@@ -508,7 +509,6 @@
           <td class="pc-only p-2 text-center border-r border-gray-200">${stu.className}</td>
           <td class="pc-only p-2 text-center border-r border-gray-200">${stu.section}</td>
 
-          <!-- Mobile Specific Columns -->
           <td class="mobile-only p-1 border-r border-gray-200 overflow-hidden">
             <div class="flex items-center gap-1">
               <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-6 h-6 rounded-full object-cover shrink-0 border" onerror="this.onerror=null;this.src='https://placehold.co/60x60?text=NA';">
@@ -523,7 +523,6 @@
           </td>
         `;
 
-        // Subject Inputs
         state.currentSubjects.forEach(sub => {
           const val = studentSavedMarks[sub] !== undefined ? studentSavedMarks[sub] : '';
           rowHtml += `
@@ -624,7 +623,7 @@
     }
 
     // ============================================================
-    // REPORT CARD BUILDER & RENDERER (Clean A4 Fit & Proportional Attendance)
+    // REPORT CARD BUILDER & RENDERER (Full A4 Balanced Height)
     // ============================================================
     function handlePrintResult() {
       const selectedIds = Array.from(document.querySelectorAll('.student-check:checked')).map(cb => cb.value);
@@ -642,7 +641,7 @@
 
       const currentExamObj = state.exams.find(e => e.examName === targetExam) || { maxMarkPerSubject: 100, subjects: [] };
 
-      // Determine Working Days based on Exam Type
+      // Determine Working Days
       let workingDays = 210;
       const isAnnual = targetExam.toLowerCase().includes("annual");
       const isHalfYearly = targetExam.toLowerCase().includes("half");
@@ -664,7 +663,7 @@
           return entry ? entry.marks : {};
         };
 
-        // Current Exam Marks Calculation
+        // 1. Current Exam Marks Calculation
         const curMarksObj = getMarksForExam(targetExam);
         let activeSubjectRows = '';
         let curObtainedSum = 0;
@@ -682,78 +681,53 @@
             curMaxSum += 100;
 
             activeSubjectRows += `
-              <tr class="border-b border-gray-300 text-center">
-                <td class="py-0.5 text-left font-semibold pl-2">${getSubjectFullName(subCode)}</td>
-                <td class="py-0.5">100</td>
-                <td class="py-0.5 font-bold">${scaledMark}</td>
-                <td class="py-0.5 font-semibold text-gray-700">${subGrade}</td>
+              <tr class="border-b border-gray-300 text-center text-[11px]">
+                <td class="py-1.5 text-left font-semibold pl-2">${getSubjectFullName(subCode)}</td>
+                <td class="py-1.5">100</td>
+                <td class="py-1.5 font-bold text-gray-900">${scaledMark}</td>
+                <td class="py-1.5 font-semibold text-gray-700">${subGrade}</td>
               </tr>
             `;
           }
         });
 
-        // Consolidated Previous Terms Calculation
+        // 2. Fixed 3-Row Consolidated Terms Calculation
         const calcTermSummary = (examName) => {
           const examInfo = state.exams.find(e => e.examName === examName);
           const mObj = getMarksForExam(examName);
           let obt = 0;
           let max = 0;
+          let hasData = false;
           if (examInfo && examInfo.subjects) {
             examInfo.subjects.forEach(sc => {
               const v = mObj[sc];
               if (v !== undefined && v !== null && v !== '') {
                 obt += Math.round(60 + ((parseFloat(v) || 0) * 0.4));
                 max += 100;
+                hasData = true;
               }
             });
           }
-          return { obt, max };
+          return { obt, max, hasData };
         };
 
         const qSummary = calcTermSummary("Quarterly Examination");
         const hySummary = calcTermSummary("Half Yearly Examination");
+        const anSummary = calcTermSummary("Annual Examination");
 
-        let grandObtained = curObtainedSum;
-        let grandMax = curMaxSum;
-        let summaryBreakdownHtml = '';
+        // Grand Total Calculation
+        let grandObtained = 0;
+        let grandMax = 0;
 
         if (targetExam.toLowerCase().includes("quarterly")) {
-          summaryBreakdownHtml = `
-            <div class="flex justify-between border-b border-gray-200 py-0.5">
-              <span>1. Quarterly Examination :</span>
-              <span class="font-bold">${curObtainedSum} / ${curMaxSum}</span>
-            </div>
-          `;
+          grandObtained = curObtainedSum;
+          grandMax = curMaxSum;
         } else if (isHalfYearly) {
           grandObtained = qSummary.obt + curObtainedSum;
           grandMax = qSummary.max + curMaxSum;
-          summaryBreakdownHtml = `
-            <div class="flex justify-between border-b border-gray-200 py-0.5">
-              <span>1. Quarterly Examination :</span>
-              <span class="font-bold">${qSummary.obt} / ${qSummary.max}</span>
-            </div>
-            <div class="flex justify-between border-b border-gray-200 py-0.5">
-              <span>2. Half Yearly Examination :</span>
-              <span class="font-bold">${curObtainedSum} / ${curMaxSum}</span>
-            </div>
-          `;
         } else {
           grandObtained = qSummary.obt + hySummary.obt + curObtainedSum;
           grandMax = qSummary.max + hySummary.max + curMaxSum;
-          summaryBreakdownHtml = `
-            <div class="flex justify-between border-b border-gray-200 py-0.5">
-              <span>1. Quarterly Examination :</span>
-              <span class="font-bold">${qSummary.obt} / ${qSummary.max}</span>
-            </div>
-            <div class="flex justify-between border-b border-gray-200 py-0.5">
-              <span>2. Half Yearly Examination :</span>
-              <span class="font-bold">${hySummary.obt} / ${hySummary.max}</span>
-            </div>
-            <div class="flex justify-between border-b border-gray-200 py-0.5">
-              <span>3. Annual Examination :</span>
-              <span class="font-bold">${curObtainedSum} / ${curMaxSum}</span>
-            </div>
-          `;
         }
 
         const finalPercentage = grandMax > 0 ? ((grandObtained / grandMax) * 100).toFixed(2) : "0.00";
@@ -766,35 +740,51 @@
           ? `<div><span class="font-semibold text-gray-600">Promotion Status:</span> <span class="font-bold text-indigo-950">Promoted to ${getPromotedClass(stu.className)}</span></div>`
           : `<div><span class="font-semibold text-gray-600">Status:</span> <span class="font-bold text-emerald-800">Progressing Satisfactorily</span></div>`;
 
+        // Fixed 3-Row Structured Progress Breakdown
+        const summaryBreakdownHtml = `
+          <div class="flex justify-between border-b border-gray-200 py-1 text-[11px]">
+            <span>1. Quarterly Examination :</span>
+            <span class="font-bold">${qSummary.hasData ? qSummary.obt + ' / ' + qSummary.max : (targetExam.toLowerCase().includes("quarterly") ? curObtainedSum + ' / ' + curMaxSum : '—')}</span>
+          </div>
+          <div class="flex justify-between border-b border-gray-200 py-1 text-[11px]">
+            <span>2. Half Yearly Examination :</span>
+            <span class="font-bold">${hySummary.hasData ? hySummary.obt + ' / ' + hySummary.max : (isHalfYearly ? curObtainedSum + ' / ' + curMaxSum : '—')}</span>
+          </div>
+          <div class="flex justify-between py-1 text-[11px]">
+            <span>3. Annual Examination :</span>
+            <span class="font-bold">${anSummary.hasData ? anSummary.obt + ' / ' + anSummary.max : (isAnnual ? curObtainedSum + ' / ' + curMaxSum : '—')}</span>
+          </div>
+        `;
+
         const card = document.createElement('div');
         card.className = 'report-card flex flex-col justify-between';
         
         card.innerHTML = `
           <!-- Header Area -->
           <div>
-            <div class="flex justify-between text-[9px] font-semibold text-gray-700 border-b border-gray-400 pb-0.5 mb-1">
+            <div class="flex justify-between text-[10px] font-semibold text-gray-700 border-b border-gray-400 pb-1 mb-2">
               <span>Recognition Number: GOP0958326469</span>
               <span>U-DISE Code: 09584109512</span>
             </div>
 
-            <div class="flex items-center justify-between gap-2 my-1">
-              <img src="${LOGO_URL}" class="w-14 h-14 object-contain" alt="Logo">
+            <div class="flex items-center justify-between gap-3 my-2">
+              <img src="${LOGO_URL}" class="w-16 h-16 object-contain" alt="Logo">
               <div class="text-center flex-1">
-                <div class="text-[9px] font-bold text-gray-700 leading-none">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
-                <h1 class="text-lg font-extrabold tracking-wide text-indigo-950 mt-0.5">AMBEDKAR PUBLIC SCHOOL</h1>
-                <p class="text-[9px] font-medium text-gray-600">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
+                <div class="text-[10px] font-bold text-gray-700 tracking-wide">“A Government Recognized School” / “सरकार द्वारा मान्यता प्राप्त”</div>
+                <h1 class="text-xl font-extrabold tracking-wide text-indigo-950 mt-0.5">AMBEDKAR PUBLIC SCHOOL</h1>
+                <p class="text-[10px] font-medium text-gray-600">Madhopur, Campierganj, Gorakhpur (U.P.)</p>
               </div>
-              <div class="w-14"></div>
+              <div class="w-16"></div>
             </div>
 
             <!-- Title Banner -->
-            <div class="card-banner text-white text-center py-0.5 font-bold text-xs tracking-wider uppercase rounded shadow-sm my-1">
+            <div class="card-banner text-white text-center py-1.5 font-bold text-xs tracking-wider uppercase rounded shadow-sm my-2">
               Result of ${targetExam} (${targetSession})
             </div>
 
             <!-- Student Profile -->
-            <div class="border border-gray-400 p-1.5 rounded flex justify-between items-center my-1.5 text-[10px] bg-slate-50/50">
-              <div class="grid grid-cols-2 gap-x-3 gap-y-0.5 flex-1">
+            <div class="border border-gray-400 p-2.5 rounded flex justify-between items-center my-2 text-[11px] bg-slate-50/50">
+              <div class="grid grid-cols-2 gap-x-4 gap-y-1 flex-1">
                 <div><span class="text-gray-500 font-medium">Student's Name:</span> <span class="font-bold text-gray-900 uppercase">${stu.studentName}</span></div>
                 <div><span class="text-gray-500 font-medium">Class & Sec:</span> <span class="font-bold text-gray-900">${stu.className} - ${stu.section}</span></div>
                 <div><span class="text-gray-500 font-medium">Student ID:</span> <span class="font-bold font-mono text-gray-900">${stu.studentId}</span></div>
@@ -802,74 +792,74 @@
                 <div><span class="text-gray-500 font-medium">Mother's Name:</span> <span class="font-semibold text-gray-900">${stu.motherName || '—'}</span></div>
                 <div><span class="text-gray-500 font-medium">Father's Name:</span> <span class="font-semibold text-gray-900">${stu.fatherName}</span></div>
               </div>
-              <div class="w-16 h-20 border border-gray-400 bg-white p-0.5 rounded shrink-0 ml-2 shadow-sm">
+              <div class="w-20 h-24 border border-gray-400 bg-white p-0.5 rounded shrink-0 ml-3 shadow-sm">
                 <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded" alt="Student Photo">
               </div>
             </div>
 
             <!-- Performance Grids -->
-            <div class="grid grid-cols-12 gap-2 my-1 items-start">
+            <div class="grid grid-cols-12 gap-3 my-2 items-start">
               
               <!-- Scholastic Marks -->
               <div class="col-span-7 border border-gray-400 rounded overflow-hidden">
-                <div class="bg-indigo-900 text-white font-bold text-center py-0.5 text-[9px] tracking-wider uppercase">
+                <div class="bg-indigo-900 text-white font-bold text-center py-1 text-[10px] tracking-wider uppercase">
                   Scholastic Performance (${targetExam})
                 </div>
-                <table class="w-full text-[9px]">
+                <table class="w-full text-[11px]">
                   <thead class="bg-indigo-50 font-bold border-b border-gray-400">
                     <tr class="text-center">
-                      <th class="py-0.5 text-left pl-2">Subject</th>
-                      <th class="py-0.5">Max</th>
-                      <th class="py-0.5">Gained</th>
-                      <th class="py-0.5">Grade</th>
+                      <th class="py-1 text-left pl-2">Subject</th>
+                      <th class="py-1">Max</th>
+                      <th class="py-1">Gained</th>
+                      <th class="py-1">Grade</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${activeSubjectRows || '<tr><td colspan="4" class="text-center py-2 text-gray-400">कोई अंक उपलब्ध नहीं</td></tr>'}
+                    ${activeSubjectRows || '<tr><td colspan="4" class="text-center py-4 text-gray-400">कोई अंक उपलब्ध नहीं</td></tr>'}
                   </tbody>
                   <tfoot class="bg-indigo-50 font-bold border-t border-gray-400 text-center">
                     <tr>
-                      <td class="py-0.5 text-left pl-2">Total (${targetExam})</td>
-                      <td class="py-0.5">${curMaxSum}</td>
-                      <td class="py-0.5 text-indigo-900">${curObtainedSum}</td>
-                      <td class="py-0.5">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
+                      <td class="py-1 text-left pl-2">Total (${targetExam})</td>
+                      <td class="py-1">${curMaxSum}</td>
+                      <td class="py-1 text-indigo-900 font-extrabold">${curObtainedSum}</td>
+                      <td class="py-1 font-bold">${calculateGrade(curMaxSum > 0 ? (curObtainedSum/curMaxSum)*100 : 0)}</td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
 
               <!-- Co-Scholastic & Attendance -->
-              <div class="col-span-5 flex flex-col gap-1.5">
+              <div class="col-span-5 flex flex-col gap-2.5">
                 
                 <div class="border border-gray-400 rounded overflow-hidden">
-                  <div class="bg-indigo-900 text-white font-bold text-center py-0.5 text-[9px] tracking-wider uppercase">
+                  <div class="bg-indigo-900 text-white font-bold text-center py-1 text-[10px] tracking-wider uppercase">
                     Co-Scholastic Areas
                   </div>
-                  <table class="w-full text-[9px]">
+                  <table class="w-full text-[11px]">
                     <thead class="bg-indigo-50 font-bold border-b border-gray-400">
                       <tr class="text-center">
-                        <th class="py-0.5 text-left pl-2">Areas</th>
-                        <th class="py-0.5 text-right pr-2">Grade</th>
+                        <th class="py-1 text-left pl-2">Areas</th>
+                        <th class="py-1 text-right pr-2">Grade</th>
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                      <tr><td class="py-0.5 pl-2">Discipline</td><td class="py-0.5 text-right pr-2 font-medium">Well-Behaved</td></tr>
-                      <tr><td class="py-0.5 pl-2">Cleanliness</td><td class="py-0.5 text-right pr-2 font-medium">Maintained</td></tr>
-                      <tr><td class="py-0.5 pl-2">Speaking Skill</td><td class="py-0.5 text-right pr-2 font-medium">Articulate</td></tr>
-                      <tr><td class="py-0.5 pl-2">Activity Participation</td><td class="py-0.5 text-right pr-2 font-medium">Enthusiastic</td></tr>
-                      <tr><td class="py-0.5 pl-2">Homework Regularity</td><td class="py-0.5 text-right pr-2 font-medium">Consistent</td></tr>
+                      <tr><td class="py-1 pl-2">Discipline</td><td class="py-1 text-right pr-2 font-medium">Well-Behaved</td></tr>
+                      <tr><td class="py-1 pl-2">Cleanliness</td><td class="py-1 text-right pr-2 font-medium">Maintained</td></tr>
+                      <tr><td class="py-1 pl-2">Speaking Skill</td><td class="py-1 text-right pr-2 font-medium">Articulate</td></tr>
+                      <tr><td class="py-1 pl-2">Activity Participation</td><td class="py-1 text-right pr-2 font-medium">Enthusiastic</td></tr>
+                      <tr><td class="py-1 pl-2">Homework Regularity</td><td class="py-1 text-right pr-2 font-medium">Consistent</td></tr>
                     </tbody>
                   </table>
                 </div>
 
                 <div class="border border-gray-400 rounded overflow-hidden">
-                  <div class="bg-indigo-900 text-white font-bold text-center py-0.5 text-[9px] tracking-wider uppercase">
+                  <div class="bg-indigo-900 text-white font-bold text-center py-1 text-[10px] tracking-wider uppercase">
                     Attendance Record
                   </div>
-                  <div class="p-1 text-[9px] space-y-0.5 bg-white">
+                  <div class="p-2 text-[11px] space-y-1 bg-white">
                     <div class="flex justify-between"><span>Working Days:</span><span class="font-bold">${workingDays}</span></div>
                     <div class="flex justify-between"><span>Present Days:</span><span class="font-bold">${presentDays}</span></div>
-                    <div class="flex justify-between border-t border-gray-200 pt-0.5"><span>Attendance:</span><span class="font-bold text-indigo-900">${attendancePercent}%</span></div>
+                    <div class="flex justify-between border-t border-gray-200 pt-1"><span>Attendance:</span><span class="font-bold text-indigo-900">${attendancePercent}%</span></div>
                   </div>
                 </div>
 
@@ -877,42 +867,42 @@
 
             </div>
 
-            <!-- Consolidated Summary Box -->
-            <div class="border border-indigo-900 rounded my-1.5 bg-indigo-50/40 p-1.5 text-[10px]">
-              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-0.5 mb-0.5 text-[9px]">CONSOLIDATED PROGRESS SUMMARY</div>
-              <div class="grid grid-cols-2 gap-x-3">
+            <!-- Fixed 3-Row Consolidated Summary Box -->
+            <div class="border border-indigo-900 rounded my-2 bg-indigo-50/40 p-2.5 text-[11px]">
+              <div class="font-bold text-indigo-950 border-b border-indigo-200 pb-1 mb-1 text-[10px] uppercase tracking-wider">CONSOLIDATED PROGRESS SUMMARY</div>
+              <div class="grid grid-cols-2 gap-x-4 items-center">
                 <div class="space-y-0.5">${summaryBreakdownHtml}</div>
-                <div class="border-l border-indigo-200 pl-2 flex flex-col justify-center space-y-0.5">
-                  <div class="flex justify-between"><span>Grand Total:</span><span class="font-bold text-xs text-indigo-950">${grandObtained} / ${grandMax}</span></div>
-                  <div class="flex justify-between"><span>Percentage:</span><span class="font-bold text-xs text-indigo-950">${finalPercentage}%</span></div>
-                  <div class="flex justify-between"><span>Overall Grade:</span><span class="font-bold text-xs text-indigo-950">${overallGrade}</span></div>
+                <div class="border-l border-indigo-200 pl-3 flex flex-col justify-center space-y-1">
+                  <div class="flex justify-between items-center"><span class="text-gray-600">Grand Total:</span><span class="font-bold text-sm text-indigo-950">${grandObtained} / ${grandMax}</span></div>
+                  <div class="flex justify-between items-center"><span class="text-gray-600">Percentage:</span><span class="font-bold text-sm text-indigo-950">${finalPercentage}%</span></div>
+                  <div class="flex justify-between items-center"><span class="text-gray-600">Overall Grade:</span><span class="font-bold text-sm text-indigo-950">${overallGrade}</span></div>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Bottom Remarks, QR Code & Signatures -->
-          <div class="border-t border-gray-400 pt-1.5 mt-1">
-            <div class="flex justify-between items-center text-[9px] mb-1">
+          <div class="border-t border-gray-400 pt-2.5 mt-auto">
+            <div class="flex justify-between items-center text-[10px] mb-3">
               <div><span class="font-semibold text-gray-600">Teacher's Remark:</span> <span class="font-medium italic">Shows consistent progress, good conduct and focus.</span></div>
               ${promotionHtml}
             </div>
 
-            <div class="flex justify-between items-end pt-2 pb-0.5 text-center text-[9px] font-bold text-gray-800">
+            <div class="flex justify-between items-end pt-4 pb-1 text-center text-[10px] font-bold text-gray-800">
               <div class="flex flex-col items-center">
-                <div id="qr_${studentId}" class="mb-0.5 p-0.5 border border-gray-300 rounded bg-white"></div>
+                <div id="qr_${studentId}" class="mb-1 p-0.5 border border-gray-300 rounded bg-white"></div>
                 <span class="text-[8px] text-gray-500 font-normal">Scan to Verify</span>
                 <span class="text-[8px] text-gray-500 font-normal">Date: ${new Date().toLocaleDateString('en-GB')}</span>
               </div>
 
               <div class="flex flex-col items-center">
-                <div class="h-6"></div>
-                <div class="border-t border-gray-800 w-28 pt-0.5">Class Teacher</div>
+                <div class="h-10"></div>
+                <div class="border-t border-gray-800 w-32 pt-1">Class Teacher</div>
               </div>
 
               <div class="flex flex-col items-center">
-                <div class="h-6"></div>
-                <div class="border-t border-gray-800 w-36 pt-0.5">
+                <div class="h-10"></div>
+                <div class="border-t border-gray-800 w-44 pt-1">
                   <div>Principal's Stamp & Signature</div>
                   <div class="text-[8px] text-gray-500 font-normal">Ambedkar Public School</div>
                 </div>
@@ -925,8 +915,8 @@
 
         new QRCode(document.getElementById(`qr_${studentId}`), {
           text: `APS MADHOPUR | Student: ${stu.studentName} | ID: ${stu.studentId} | Class: ${stu.className} | Session: ${targetSession} | Status: ${isAnnual ? 'PROMOTED' : 'PASS'}`,
-          width: 40,
-          height: 40,
+          width: 44,
+          height: 44,
           colorDark: "#1e1b4b",
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.M
