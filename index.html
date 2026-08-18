@@ -95,11 +95,11 @@
     }
 
     /* -------------------------------------------------------------
-       4. REPORT CARD & EXACT A4 PRINT STYLING
+       4. REPORT CARD & EXACT A4 100% FIT PRINT STYLING
     ------------------------------------------------------------- */
     @page {
       size: A4 portrait;
-      margin: 6mm;
+      margin: 0;
     }
     .report-card {
       width: 194mm;
@@ -116,10 +116,12 @@
     }
 
     @media print {
-      body {
-        background-color: transparent !important;
-        padding: 0 !important;
+      html, body {
+        width: 210mm !important;
+        height: 297mm !important;
         margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
         color: #000000 !important;
       }
       .no-print {
@@ -133,12 +135,22 @@
         position: static !important;
         background: transparent !important;
         padding: 0 !important;
+        margin: 0 !important;
       }
       .report-card {
+        width: 100% !important;
+        max-width: 210mm !important;
+        min-height: 297mm !important;
         margin: 0 auto !important;
-        border: 2px solid #000 !important;
+        padding: 8mm 10mm !important;
+        box-sizing: border-box !important;
+        border: 2px solid #000000 !important;
         page-break-after: always !important;
         break-after: page !important;
+      }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
     }
 
@@ -630,7 +642,7 @@
 
       const currentExamObj = state.exams.find(e => e.examName === targetExam) || { maxMarkPerSubject: 100, subjects: [] };
 
-      // 1. Determine Working Days based on Exam Type (210/3=70 for Q, 210/2=105 for HY, 210 for Annual)
+      // Determine Working Days based on Exam Type
       let workingDays = 210;
       const isAnnual = targetExam.toLowerCase().includes("annual");
       const isHalfYearly = targetExam.toLowerCase().includes("half");
@@ -652,7 +664,7 @@
           return entry ? entry.marks : {};
         };
 
-        // 2. Current Exam Marks Calculation
+        // Current Exam Marks Calculation
         const curMarksObj = getMarksForExam(targetExam);
         let activeSubjectRows = '';
         let curObtainedSum = 0;
@@ -680,7 +692,7 @@
           }
         });
 
-        // 3. Consolidated Previous Terms Calculation
+        // Consolidated Previous Terms Calculation
         const calcTermSummary = (examName) => {
           const examInfo = state.exams.find(e => e.examName === examName);
           const mObj = getMarksForExam(examName);
@@ -747,16 +759,13 @@
         const finalPercentage = grandMax > 0 ? ((grandObtained / grandMax) * 100).toFixed(2) : "0.00";
         const overallGrade = calculateGrade(parseFloat(finalPercentage));
 
-        // Present days calculated on current working days
         const presentDays = Math.round(workingDays * (0.75 + (parseFloat(finalPercentage) / 100) * 0.20));
         const attendancePercent = ((presentDays / workingDays) * 100).toFixed(2);
 
-        // 4. Promotion Status only on Annual Exam
         const promotionHtml = isAnnual
           ? `<div><span class="font-semibold text-gray-600">Promotion Status:</span> <span class="font-bold text-indigo-950">Promoted to ${getPromotedClass(stu.className)}</span></div>`
           : `<div><span class="font-semibold text-gray-600">Status:</span> <span class="font-bold text-emerald-800">Progressing Satisfactorily</span></div>`;
 
-        // Report Card Outer Element
         const card = document.createElement('div');
         card.className = 'report-card flex flex-col justify-between';
         
@@ -882,7 +891,7 @@
             </div>
           </div>
 
-          <!-- Bottom Remarks, QR Code & Signatures (Zero Extra Gap) -->
+          <!-- Bottom Remarks, QR Code & Signatures -->
           <div class="border-t border-gray-400 pt-1.5 mt-1">
             <div class="flex justify-between items-center text-[9px] mb-1">
               <div><span class="font-semibold text-gray-600">Teacher's Remark:</span> <span class="font-medium italic">Shows consistent progress, good conduct and focus.</span></div>
@@ -914,7 +923,6 @@
 
         container.appendChild(card);
 
-        // QR Code Generator
         new QRCode(document.getElementById(`qr_${studentId}`), {
           text: `APS MADHOPUR | Student: ${stu.studentName} | ID: ${stu.studentId} | Class: ${stu.className} | Session: ${targetSession} | Status: ${isAnnual ? 'PROMOTED' : 'PASS'}`,
           width: 40,
@@ -925,7 +933,6 @@
         });
       });
 
-      // Show Result View
       document.getElementById('portalSection').classList.add('hidden');
       document.getElementById('resultModalSection').classList.remove('hidden');
       window.scrollTo(0, 0);
