@@ -3,18 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Exam Mark Entry Portal</title>
+  <title>APS Exam Portal - Mark Entry</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
+    /* -------------------------------------------------------------
+       1. FREEZE HEADER (Sticky Like Google Sheets)
+    ------------------------------------------------------------- */
+    .table-scroll-container {
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      position: relative;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    /* -------------------------------------------------------------
+       2. MOBILE SPECIFIC CSS (Screens up to 768px - Landscape/Portrait)
+    ------------------------------------------------------------- */
+    @media (max-width: 768px) {
+      .pc-only { display: none !important; }
+      .mobile-only { display: table-cell !important; }
+      
+      .table-scroll-container {
+        max-height: calc(100vh - 100px);
+      }
+
+      /* Compact table styling for mobile */
+      table {
+        table-layout: fixed;
+        width: 100%;
+      }
+      th, td {
+        padding: 2px 1px !important;
+        font-size: 10px !important;
+      }
+      .subject-input {
+        width: 100% !important;
+        max-width: 32px !important;
+        height: 24px !important;
+        font-size: 11px !important;
+        padding: 0 !important;
+        text-align: center;
+      }
+    }
+
+    /* -------------------------------------------------------------
+       3. PC / DESKTOP SPECIFIC CSS (Screens 769px and above)
+    ------------------------------------------------------------- */
+    @media (min-width: 769px) {
+      .mobile-only { display: none !important; }
+      .pc-only { display: table-cell !important; }
+
+      .table-scroll-container {
+        max-height: calc(100vh - 150px);
+      }
+
+      table {
+        table-layout: auto;
+        width: 100%;
+      }
+      th, td {
+        padding: 6px 8px !important;
+        font-size: 13px !important;
+      }
+      .subject-input {
+        width: 52px !important;
+        height: 32px !important;
+        font-size: 13px !important;
+        text-align: center;
+        border-radius: 4px;
+      }
+    }
+
+    /* -------------------------------------------------------------
+       4. PRINT STYLING
+    ------------------------------------------------------------- */
     @media print {
       .no-print { display: none !important; }
+      .table-scroll-container { max-height: none !important; overflow: visible !important; }
+      thead th { position: static !important; }
       body { background: white; color: black; }
-      table { border-collapse: collapse; width: 100%; font-size: 10px; }
-      th, td { border: 1px solid #000 !important; padding: 2px 3px !important; }
+      table { border-collapse: collapse; width: 100%; font-size: 11px; }
+      th, td { border: 1px solid #000 !important; padding: 4px 6px !important; }
       input { border: none !important; background: transparent !important; }
     }
-    /* Number arrows remove */
+
+    /* Remove spin arrows */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
@@ -22,78 +103,92 @@
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen text-gray-800 text-[11px]">
+<body class="bg-gray-100 min-h-screen text-gray-800">
 
-  <header class="bg-indigo-700 text-white px-2 py-1.5 shadow-md no-print sticky top-0 z-50">
-    <div class="w-full flex justify-between items-center gap-2">
-      <h1 class="text-xs sm:text-sm font-bold flex items-center gap-1">
+  <!-- Top Sticky Header -->
+  <header class="bg-indigo-700 text-white px-3 py-2 shadow-md no-print sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
+      <h1 class="text-xs sm:text-base md:text-lg font-bold flex items-center gap-1.5">
         <i class="fa-solid fa-graduation-cap"></i> APS Exam Portal
       </h1>
       
-      <div class="flex items-center gap-1.5">
-        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-0.5 rounded text-[10px] font-medium shadow flex items-center gap-1">
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-medium shadow flex items-center gap-1">
           <i class="fa-solid fa-print"></i> प्रिंट
         </button>
-        <button onclick="handlePrintResult()" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-0.5 rounded text-[10px] font-medium shadow flex items-center gap-1">
+        <button onclick="handlePrintResult()" class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded text-xs font-medium shadow flex items-center gap-1">
           <i class="fa-solid fa-file-lines"></i> रिजल्ट (<span id="selectedCount">0</span>)
         </button>
       </div>
     </div>
   </header>
 
-  <div class="w-full px-2 py-1.5 no-print">
-    <div class="bg-white rounded shadow-sm p-1.5 grid grid-cols-5 gap-1.5 items-center">
+  <!-- Filter Bar -->
+  <div class="max-w-7xl mx-auto px-2 py-2 no-print">
+    <div class="bg-white rounded-lg shadow-sm p-2 grid grid-cols-5 gap-1.5 sm:gap-3 items-center">
       
+      <!-- Session Filter -->
       <div>
-        <label class="block text-[9px] font-semibold text-gray-500 leading-tight">Session</label>
-        <select id="filterSession" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1 py-0.5 text-[10px] focus:ring-0">
+        <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Session</label>
+        <select id="filterSession" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
           <option value="">लोड...</option>
         </select>
       </div>
 
+      <!-- Exam Name Filter -->
       <div>
-        <label class="block text-[9px] font-semibold text-gray-500 leading-tight">Exam</label>
-        <select id="filterExam" onchange="onExamChange()" class="w-full border border-gray-300 rounded px-1 py-0.5 text-[10px] focus:ring-0">
+        <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Exam</label>
+        <select id="filterExam" onchange="onExamChange()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
           <option value="">परीक्षा चुनें</option>
         </select>
       </div>
 
+      <!-- Class Filter -->
       <div>
-        <label class="block text-[9px] font-semibold text-gray-500 leading-tight">Class</label>
-        <select id="filterClass" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1 py-0.5 text-[10px] focus:ring-0">
+        <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Class</label>
+        <select id="filterClass" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
           <option value="ALL">All</option>
         </select>
       </div>
 
+      <!-- Section Filter -->
       <div>
-        <label class="block text-[9px] font-semibold text-gray-500 leading-tight">Sec</label>
-        <select id="filterSection" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1 py-0.5 text-[10px] focus:ring-0">
+        <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Sec</label>
+        <select id="filterSection" onchange="applyFilters()" class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
           <option value="ALL">All</option>
         </select>
       </div>
 
+      <!-- Search Box -->
       <div>
-        <label class="block text-[9px] font-semibold text-gray-500 leading-tight">Search</label>
-        <input type="text" id="filterSearch" oninput="applyFilters()" placeholder="खोजें..." class="w-full border border-gray-300 rounded px-1 py-0.5 text-[10px] focus:ring-0">
+        <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 leading-tight mb-0.5">Search</label>
+        <input type="text" id="filterSearch" oninput="applyFilters()" placeholder="खोजें..." class="w-full border border-gray-300 rounded px-1.5 py-1 text-[11px] sm:text-xs focus:ring-1 focus:ring-indigo-500">
       </div>
 
     </div>
   </div>
 
-  <main class="w-full px-1 pb-10">
-    <div id="loadingStatus" class="text-center py-6 font-medium text-indigo-600 text-xs">
-      <i class="fa-solid fa-spinner fa-spin text-lg mb-1"></i><br>लोड हो रहा है...
+  <!-- Table Container with Frozen Header Scroll -->
+  <main class="max-w-7xl mx-auto px-1 sm:px-2 pb-6">
+    <div id="loadingStatus" class="text-center py-8 font-medium text-indigo-600 text-xs sm:text-sm">
+      <i class="fa-solid fa-spinner fa-spin text-xl mb-1.5"></i><br>लोड हो रहा है, प्रतीक्षा करें...
     </div>
 
-    <div id="tableContainer" class="bg-white rounded shadow-sm overflow-hidden hidden w-full">
-      <table class="w-full text-left border-collapse table-fixed">
-        <thead class="bg-indigo-50 text-indigo-950 font-bold border-b border-indigo-200 select-none">
-          <tr id="tableHeaderRow">
+    <div id="tableContainer" class="bg-white rounded-lg shadow-sm border border-gray-200 hidden">
+      <!-- Fixed Height Scrolling Container -->
+      <div class="table-scroll-container">
+        <table class="border-collapse">
+          <thead class="bg-indigo-100 text-indigo-950 font-bold border-b border-indigo-200 select-none">
+            <tr id="tableHeaderRow">
+              <!-- Dynamic Headers -->
             </tr>
-        </thead>
-        <tbody id="studentTableBody" class="divide-y divide-gray-200">
+          </thead>
+          <tbody id="studentTableBody" class="divide-y divide-gray-200">
+            <!-- Dynamic Rows -->
           </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   </main>
 
@@ -112,7 +207,7 @@
     };
 
     function formatDrivePhoto(url) {
-      if (!url) return 'https://placehold.co/50x50?text=NA';
+      if (!url) return 'https://placehold.co/60x60?text=NA';
       let fileId = '';
       const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       const dMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -120,7 +215,7 @@
       if (idMatch && idMatch[1]) fileId = idMatch[1];
       else if (dMatch && dMatch[1]) fileId = dMatch[1];
 
-      return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w60` : url;
+      return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w80` : url;
     }
 
     async function init() {
@@ -190,17 +285,27 @@
     function renderHeaders() {
       const tr = document.getElementById('tableHeaderRow');
       tr.innerHTML = `
-        <th class="p-1 text-center w-7 border-r border-indigo-100">
-          <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this.checked)" class="cursor-pointer scale-90">
+        <th class="p-1 text-center w-7 sm:w-10 border-r border-indigo-200">
+          <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this.checked)" class="cursor-pointer scale-90 sm:scale-100">
         </th>
-        <th class="p-1 text-center w-6 cursor-pointer border-r border-indigo-100" onclick="sortTable('sr')">#</th>
-        <th class="p-1 text-left w-28 sm:w-36 cursor-pointer border-r border-indigo-100" onclick="sortTable('studentName')">छात्र विवरण</th>
-        <th class="p-1 text-center w-10 cursor-pointer border-r border-indigo-100" onclick="sortTable('className')">कक्षा</th>
+        <th class="p-1 text-center w-6 sm:w-12 cursor-pointer border-r border-indigo-200" onclick="sortTable('sr')">#</th>
+        
+        <!-- PC Headers -->
+        <th class="pc-only p-2 cursor-pointer border-r border-indigo-200" onclick="sortTable('studentId')">ID</th>
+        <th class="pc-only p-2 text-center border-r border-indigo-200">Photo</th>
+        <th class="pc-only p-2 cursor-pointer border-r border-indigo-200" onclick="sortTable('studentName')">छात्र का नाम</th>
+        <th class="pc-only p-2 cursor-pointer border-r border-indigo-200" onclick="sortTable('fatherName')">पिता का नाम</th>
+        <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('className')">Class</th>
+        <th class="pc-only p-2 text-center cursor-pointer border-r border-indigo-200" onclick="sortTable('section')">Sec</th>
+
+        <!-- Mobile Single Header -->
+        <th class="mobile-only p-1 text-left w-28 sm:w-36 cursor-pointer border-r border-indigo-200" onclick="sortTable('studentName')">छात्र विवरण</th>
+        <th class="mobile-only p-1 text-center w-10 cursor-pointer border-r border-indigo-200" onclick="sortTable('className')">कक्षा</th>
       `;
       
       state.currentSubjects.forEach(sub => {
         const th = document.createElement('th');
-        th.className = "p-0.5 text-center text-[10px] font-bold border-r border-indigo-100 last:border-r-0";
+        th.className = "p-1 text-center font-bold border-r border-indigo-200 last:border-r-0";
         th.textContent = sub;
         tr.appendChild(th);
       });
@@ -232,42 +337,48 @@
 
       state.filteredStudents.forEach((stu, idx) => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-indigo-50/40 transition border-b border-gray-100";
+        tr.className = "hover:bg-indigo-50/40 transition border-b border-gray-200";
         
         const compositeKey = `${currentSession}_${stu.studentId}_${currentExam}`;
         const studentSavedMarks = state.savedMarks[compositeKey] || {};
 
         let rowHtml = `
-          <td class="p-0.5 text-center border-r border-gray-100">
-            <input type="checkbox" class="student-check cursor-pointer scale-90" value="${stu.studentId}" onchange="updateSelectedCount()">
+          <!-- Common: Checkbox & SR -->
+          <td class="p-1 text-center border-r border-gray-200">
+            <input type="checkbox" class="student-check cursor-pointer scale-90 sm:scale-100" value="${stu.studentId}" onchange="updateSelectedCount()">
           </td>
+          <td class="p-1 text-center text-gray-500 font-mono text-[10px] sm:text-xs border-r border-gray-200">${idx + 1}</td>
           
-          <td class="p-0.5 text-center text-gray-400 font-mono text-[9px] border-r border-gray-100">${idx + 1}</td>
-          
-          <td class="p-1 border-r border-gray-100 overflow-hidden">
+          <!-- PC Specific Columns -->
+          <td class="pc-only p-2 font-mono font-medium border-r border-gray-200">${stu.studentId}</td>
+          <td class="pc-only p-1.5 text-center border-r border-gray-200">
+            <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full object-cover mx-auto border" onerror="this.onerror=null;this.src='https://placehold.co/60x60?text=NA';">
+          </td>
+          <td class="pc-only p-2 font-semibold text-gray-900 border-r border-gray-200">${stu.studentName}</td>
+          <td class="pc-only p-2 text-gray-600 border-r border-gray-200">${stu.fatherName}</td>
+          <td class="pc-only p-2 text-center border-r border-gray-200">${stu.className}</td>
+          <td class="pc-only p-2 text-center border-r border-gray-200">${stu.section}</td>
+
+          <!-- Mobile Specific Columns -->
+          <td class="mobile-only p-1 border-r border-gray-200 overflow-hidden">
             <div class="flex items-center gap-1">
-              <img src="${formatDrivePhoto(stu.photoLink)}" 
-                   referrerpolicy="no-referrer" 
-                   loading="lazy"
-                   class="w-6 h-6 rounded-full object-cover shrink-0 border border-gray-200" 
-                   onerror="this.onerror=null;this.src='https://placehold.co/50x50?text=NA';">
+              <img src="${formatDrivePhoto(stu.photoLink)}" referrerpolicy="no-referrer" class="w-6 h-6 rounded-full object-cover shrink-0 border" onerror="this.onerror=null;this.src='https://placehold.co/60x60?text=NA';">
               <div class="truncate leading-none">
                 <div class="font-bold text-gray-900 truncate text-[11px]">${stu.studentName}</div>
                 <div class="text-[9px] text-gray-500 truncate mt-0.5">${stu.fatherName || stu.studentId}</div>
               </div>
             </div>
           </td>
-          
-          <td class="p-0.5 text-center font-semibold text-gray-700 text-[10px] border-r border-gray-100 leading-tight">
+          <td class="mobile-only p-0.5 text-center font-semibold text-gray-700 text-[10px] border-r border-gray-200 leading-tight">
             ${stu.className}<span class="text-[9px] text-gray-400 block">${stu.section}</span>
           </td>
         `;
 
-        // Subjects Compact Input Box
+        // Subject Inputs
         state.currentSubjects.forEach(sub => {
           const val = studentSavedMarks[sub] !== undefined ? studentSavedMarks[sub] : '';
           rowHtml += `
-            <td class="p-0.5 text-center border-r border-gray-100 last:border-r-0">
+            <td class="p-1 text-center border-r border-gray-200 last:border-r-0">
               <input type="text" 
                      data-session="${currentSession}" 
                      data-id="${stu.studentId}" 
@@ -277,7 +388,7 @@
                      data-sub="${sub}"
                      value="${val}" 
                      onblur="saveSingleMark(this)" 
-                     class="w-full max-w-[34px] h-6 border border-gray-300 rounded text-center text-[11px] font-medium focus:bg-indigo-50 focus:border-indigo-600 outline-none p-0">
+                     class="subject-input border border-gray-300 rounded font-medium focus:bg-indigo-50 focus:border-indigo-600 outline-none transition">
             </td>
           `;
         });
@@ -325,9 +436,9 @@
 
         state.savedMarks[key][subject] = value;
         input.classList.remove('border-amber-400', 'bg-amber-50');
-        input.classList.add('border-emerald-500', 'bg-emerald-50/40');
+        input.classList.add('border-emerald-500', 'bg-emerald-50/50');
         setTimeout(() => {
-          input.classList.remove('bg-emerald-50/40');
+          input.classList.remove('bg-emerald-50/50');
           input.classList.add('border-gray-300');
         }, 1500);
       } catch (err) {
